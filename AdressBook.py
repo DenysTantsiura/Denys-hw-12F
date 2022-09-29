@@ -213,7 +213,8 @@ class Record:
             return full_years_old.days//365
 
 
-def validation_add(user_command, number_format, name):
+# !!!!!!!!!!!!!!! -> str or None ?
+def validation_add(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook):
 
     if not name:  # len(user_command) < 2:
         return "Give me name OR name and phone please\n"
@@ -234,7 +235,8 @@ def validation_add(user_command, number_format, name):
                 +dd(ddd)ddd-dddd\n"
 
 
-def validation_add_phone(user_command, number_format, name):
+# !!!!!!!!!!!!!!! -> str or None ?
+def validation_add_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook):
 
     if len(user_command) < 3:  # or not name:
         return "Give me name and new phone(s) please\n"
@@ -245,13 +247,17 @@ def validation_add_phone(user_command, number_format, name):
     elif not name[0].isalpha():
         return "The name can only begin with Latin characters!\n"
 
+    if name not in contact_dictionary:
+        return "You cannot add a phone to a non-existent user. Make a user record first."
+
     for phone_candidate in user_command[2:]:
         if not re.search(number_format, phone_candidate):
             return "The number(s) is invalid.\nThe number must be in the following format with 12 digits(d):\
              +dd(ddd)ddd-dddd\n"
 
 
-def validation_change(user_command, number_format, name):
+# !!!!!!!!!!!!!!! -> str or None ?
+def validation_change(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook):
 
     if not contact_dictionary:
         return "No contact records available. You can add records\n"
@@ -270,7 +276,8 @@ def validation_change(user_command, number_format, name):
         The number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd\n"
 
 
-def validation_phone(_, name):
+# !!!!!!!!!!!!!!! -> str or None ?
+def validation_phone(_, name: str, contact_dictionary: AddressBook):
 
     if not contact_dictionary:
         return "No contact records available\n"
@@ -285,7 +292,8 @@ def validation_phone(_, name):
         return "The name can only begin with Latin characters!\n"
 
 
-def validation_show(user_command):
+# !!!!!!!!!!!!!!! -> str or None ?
+def validation_show(user_command: list, contact_dictionary: AddressBook):
 
     if not contact_dictionary:
         return "No contact records available\n"
@@ -300,7 +308,8 @@ def validation_show(user_command):
         return "The name can only begin with Latin characters!\n"
 
 
-def validation_birthday(user_command, name):
+# !!!!!!!!!!!!!!! -> str or None ?
+def validation_birthday(user_command: list, name: str, contact_dictionary: AddressBook):
 
     if not contact_dictionary:
         return "No contact records available\n"
@@ -328,7 +337,8 @@ def input_error(handler):
     incoming: handler (function)
     return: result(str) or exception_function(handler(user_command))"""
     # => user input command items in the list
-    def exception_function(user_command):
+    # !!!!!!!!!!!! -> str or list ?
+    def exception_function(user_command: list, contact_dictionary: AddressBook):
 
         number_format = r'^\+[0-9)(-]{12,16}$'
         validation = None
@@ -344,32 +354,37 @@ def input_error(handler):
                 return "There is no search query\n"
 
         elif handler.__name__ == "handler_show":
-            validation = validation_show(user_command)
+            validation = validation_show(user_command, contact_dictionary)
 
         elif handler.__name__ == "handler_phone":
-            validation = validation_phone(user_command, name)
+            validation = validation_phone(
+                user_command, name, contact_dictionary)
 
         elif handler.__name__ == "handler_add_phone":
             validation = validation_add_phone(
-                user_command, number_format, name)
+                user_command, number_format, name, contact_dictionary)
 
         elif handler.__name__ == "handler_add_birthday":
-            validation = validation_birthday(user_command, name)
+            validation = validation_birthday(
+                user_command, name, contact_dictionary)
 
         elif handler.__name__ == "handler_add":
-            validation = validation_add(user_command, number_format, name)
+            validation = validation_add(
+                user_command, number_format, name, contact_dictionary)
 
         elif handler.__name__ == "handler_change_birthday":
-            validation = validation_birthday(user_command, name)
+            validation = validation_birthday(
+                user_command, name, contact_dictionary)
 
         elif handler.__name__ == "handler_change":
-            validation = validation_change(user_command, number_format, name)
+            validation = validation_change(
+                user_command, number_format, name, contact_dictionary)
 
         if validation:
             return validation
 
         try:
-            result = handler(user_command)
+            result = handler(user_command, contact_dictionary)
 
         except KeyError as error:
             return f"An incorrect name was entered ({error}), not found in the book"
@@ -392,7 +407,7 @@ def input_error(handler):
 
 
 @ input_error
-def handler_phone(user_command: list) -> str:
+def handler_phone(user_command: list, contact_dictionary: AddressBook) -> str:
     """"phone ...." With this command, the bot outputs the phone number for the specified
     contact to the console. Instead of ... the user enters the name of the contact
     whose number should be displayed.
@@ -407,7 +422,7 @@ def handler_phone(user_command: list) -> str:
 
 
 @ input_error
-def handler_change(user_command: list) -> str:  # list of str
+def handler_change(user_command: list, contact_dictionary: AddressBook) -> str:  # list of str
     """"change ..." With this command, the bot stores the new phone number
     of the existing contact in memory. Instead of ... the user enters
     the name and phone numbers (current and new), necessarily with a space.
@@ -426,7 +441,7 @@ def handler_change(user_command: list) -> str:  # list of str
 
 
 @ input_error
-def handler_add(user_command: list) -> str:
+def handler_add(user_command: list, contact_dictionary: AddressBook) -> str:
     """"add ...". With this command, the bot saves
     a new contact in memory (in the dictionary, for
     example). Instead of ... the user enters the name
@@ -449,7 +464,7 @@ def handler_add(user_command: list) -> str:
 
 
 @ input_error
-def handler_add_phone(user_command: list) -> str:
+def handler_add_phone(user_command: list, contact_dictionary: AddressBook) -> str:
     """"add ...". With this command, the bot saves
     a new phones to contact in memory (in the dictionary, for
     example). Instead of ... the user enters the name
@@ -468,12 +483,12 @@ def handler_add_phone(user_command: list) -> str:
     return "A record have been added\n"
 
 
-def handler_exit(_=None) -> str:
+def handler_exit(_=None) -> str:  # !!!!!!!!!!!! , contact_dictionary: AddressBook
     return "Good bye!"
 
 
 @ input_error
-def handler_showall(_=None) -> list:
+def handler_showall(_, contact_dictionary: AddressBook) -> list:
     """"show all". With this command, the bot outputs all saved
     contacts with phone numbers to the console.
     incoming: not_matter: any
@@ -495,6 +510,7 @@ def handler_showall(_=None) -> list:
     return all_list
 
 
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! : str Record
 def find_users(search_strings, record):
     """A simple function for to check if a record matches the search strings
     incoming: search_strings (list) strimg(s) for searching
@@ -517,7 +533,7 @@ def find_users(search_strings, record):
 
 
 @ input_error
-def handler_find(user_command: list) -> list:
+def handler_find(user_command: list, contact_dictionary: AddressBook) -> list:
     """"Find ...". With this command, the bot outputs a list 
     of users whose name or phone number matches the entered one or more(with an OR setting) string without space(" ").
     incoming: user_command (list) strimg(s) for searching
@@ -541,7 +557,7 @@ def handler_find(user_command: list) -> list:
 
 
 @ input_error
-def handler_show(user_command: list) -> str:
+def handler_show(user_command: list, contact_dictionary: AddressBook) -> str:
     """"show information about a specific user". With this command, the bot outputs
     birthday, number of days until next birthday and
     phone numbers to the console.
@@ -562,7 +578,7 @@ def handler_show(user_command: list) -> str:
 
 
 @ input_error
-def handler_add_birthday(user_command: list) -> str:
+def handler_add_birthday(user_command: list, contact_dictionary: AddressBook) -> str:
     """"add birthday...". With this command, the bot saves
     new information about user in memory (in the dictionary, for
     example). Instead of ... the user enters the name
@@ -580,7 +596,7 @@ def handler_add_birthday(user_command: list) -> str:
 
 
 @ input_error
-def handler_change_birthday(user_command: list) -> str:  # list of str
+def handler_change_birthday(user_command: list, contact_dictionary: AddressBook) -> str:  # list of str
     """"change birthday ..." With this command, the bot stores the
     "new birthday" (if the previous one was wrong)
     of the existing contact in memory. Instead of ... the user enters
@@ -598,7 +614,8 @@ def handler_change_birthday(user_command: list) -> str:  # list of str
         return f"No changes have been made\n{verdict[1]}"
 
 
-def main_handler(user_command: list):
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! -> str | list ?
+def main_handler(user_command: list, contact_dictionary: AddressBook):
     """All possible bot commands
     incoming: user command
     return: function according to the command"""
@@ -616,8 +633,8 @@ def main_handler(user_command: list):
                    "changebirthday": handler_change_birthday,
                    "find": handler_find, }
 
-    if all_command.get(user_command[0].lower(), "It is unclear") != "It is unclear":
-        return all_command.get(user_command[0].lower())(user_command)
+    if all_command.get(user_command[0].lower(), None):
+        return all_command.get(user_command[0].lower())(user_command, contact_dictionary)
 
     return "It is unclear"
 
@@ -648,7 +665,7 @@ def parser(user_input: str) -> list:
     return words
 
 
-def address_book_saver() -> None:
+def address_book_saver(contact_dictionary: AddressBook) -> None:
     """Save a class AddressBook to a file
     incoming: None
     return: None"""
@@ -674,12 +691,12 @@ def main():
             contact_dictionary = pickle.load(fh)
     else:
         contact_dictionary = AddressBook()
-        address_book_saver()
+        address_book_saver(contact_dictionary)
 
     while True:
         user_command = input()
         user_request = parser(user_command)
-        bot_answer = main_handler(user_request)
+        bot_answer = main_handler(user_request, contact_dictionary)
         if isinstance(bot_answer, str):
             print(bot_answer)
         else:
