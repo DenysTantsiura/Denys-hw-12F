@@ -434,7 +434,7 @@ def handler_change(user_command: list, contact_dictionary: AddressBook) -> str: 
     verdict = contact_dictionary[name].change_phone(current_phone, new_phone)
 
     if verdict[0]:
-        address_book_saver()
+        address_book_saver(contact_dictionary)
         return "The record has been updated\n"
     else:
         return f"No changes have been made\n{verdict[1]}"
@@ -459,7 +459,7 @@ def handler_add(user_command: list, contact_dictionary: AddressBook) -> str:
         if not verdict:
             return "There were no new entries to add\n"
 
-    address_book_saver()
+    address_book_saver(contact_dictionary)
     return "A record(s) have been added\n"
 
 
@@ -479,11 +479,12 @@ def handler_add_phone(user_command: list, contact_dictionary: AddressBook) -> st
     if not verdict:
         return "There were no new entries to add\n"
 
-    address_book_saver()
+    address_book_saver(contact_dictionary)
     return "A record have been added\n"
 
 
-def handler_exit(_=None) -> str:  # !!!!!!!!!!!! , contact_dictionary: AddressBook
+# !!!!!!!!!!!! , contact_dictionary: AddressBook
+def handler_exit(*_) -> str:
     return "Good bye!"
 
 
@@ -589,7 +590,7 @@ def handler_add_birthday(user_command: list, contact_dictionary: AddressBook) ->
     verdict = contact_dictionary[name].add_birthday(user_command[2])
 
     if verdict[0]:
-        address_book_saver()
+        address_book_saver(contact_dictionary)
         return f"Information about {name} have been updated\n"
     else:
         return f"No changes have been made\n{verdict[1]}"
@@ -608,7 +609,7 @@ def handler_change_birthday(user_command: list, contact_dictionary: AddressBook)
     verdict = contact_dictionary[name].change_birthday(user_birthday)
 
     if verdict[0]:
-        address_book_saver()
+        address_book_saver(contact_dictionary)
         return f"The record {name} has been updated\n"
     else:
         return f"No changes have been made\n{verdict[1]}"
@@ -639,7 +640,7 @@ def main_handler(user_command: list, contact_dictionary: AddressBook):
     return "It is unclear"
 
 
-def handler_hello(_=None) -> str:
+def handler_hello(*_) -> str:
     return "How can I help you?\n"
 
 
