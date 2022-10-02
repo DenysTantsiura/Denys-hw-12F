@@ -1,9 +1,7 @@
 """ !!!!!!!!!!! change it and add REMOVE Name/Phone/BIRTHDAY!!!!test!!!!!!!!!! check setter getter.... split into package modules
-1) to class Record add def remove_user, remove_birthday
-2) add handlers functions for bot-commands above
-3) add new validation-functions
+3) alphabetical sorting function...
 4) test all abov commands
-5) check all validation functions
+5) check all validation functions and "carving" to dict...
 6) check setter and getter
 7) split into package modules
 8) test everything work commands
@@ -79,6 +77,10 @@ class AddressBook(UserDict):
             yield volume
 
             current_value += n_count
+
+    def remove_record(self, name: str) -> None:
+        """Remove a record from the address book dictionary."""
+        self.data.pop(name)
 
 
 class Field:  # super for all base fields
@@ -253,6 +255,12 @@ class Record:
 
             return days_left.days
 
+    def remove_birthday(self) -> Union[bool, None]:
+        """Deleting a birthday entry from a user entry in the address book."""
+        if self.birthday:
+            self.birthday = None
+            return True
+
     def remove_phone(self, phone_to_remove: str) -> Union[bool, None]:
         """Deleting a phone entry from a user entry in the address book."""
         phone_to_remove = Phone(phone_to_remove).value
@@ -318,6 +326,32 @@ def validation_add_phone(user_command: list, number_format: str, name: str, cont
              +dd(ddd)ddd-dddd\n"
 
 
+def validation_birthday(user_command: list, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    if not contact_dictionary:
+        return "No contact records available\n"
+
+    if len(user_command) < 3:  # or not name:
+        return "Give me a name and birthday, please\n"
+
+    if name[0].isdigit():
+        return "A name cannot begin with a number!\n"
+
+    elif not name[0].isalpha():
+        return "The name can only begin with Latin characters!\n"
+
+    if 1900 > int(user_command[2].split("-")[0]) > datetime.now().year - 16:
+        return "The year of birth is not correct!\n"
+
+    else:
+        try:
+            datetime.strptime(user_command[2], "%Y-%m-%d")
+
+        except ValueError:
+
+            return "The calendar date is not possible!\n"
+
+
 def validation_change(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
@@ -367,13 +401,14 @@ def validation_show(user_command: list, contact_dictionary: AddressBook) -> Unio
         return "The name can only begin with Latin characters!\n"
 
 
-def validation_birthday(user_command: list, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_remove(user_command: list, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1]
     if not contact_dictionary:
         return "No contact records available\n"
 
-    if len(user_command) < 3:  # or not name:
-        return "Give me a name and birthday, please\n"
+    if len(user_command) < 2:
+        return "Give me a name, please\n"
 
     if name[0].isdigit():
         return "A name cannot begin with a number!\n"
@@ -381,16 +416,50 @@ def validation_birthday(user_command: list, name: str, contact_dictionary: Addre
     elif not name[0].isalpha():
         return "The name can only begin with Latin characters!\n"
 
-    if 1900 > int(user_command[2].split("-")[0]) > datetime.now().year - 16:
-        return "The year of birth is not correct!\n"
+    if name not in contact_dictionary:
+        return "You cannot remove a non-existent user."
 
-    else:
-        try:
-            datetime.strptime(user_command[2], "%Y-%m-%d")
 
-        except ValueError:
+def validation_remove_birthday(user_command: list, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    if not contact_dictionary:
+        return "No contact records available\n"
 
-            return "The calendar date is not possible!\n"
+    if len(user_command) < 2:
+        return "Give me a name, please\n"
+
+    if name[0].isdigit():
+        return "A name cannot begin with a number!\n"
+
+    elif not name[0].isalpha():
+        return "The name can only begin with Latin characters!\n"
+
+    if name not in contact_dictionary:
+        return "You cannot remove birthday entry from a non-existent user."
+
+
+def validation_remove_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    if not contact_dictionary:
+        return "No contact records available\n"
+
+    if len(user_command) < 2:
+        return "Give me a name, please\n"
+
+    if name[0].isdigit():
+        return "A name cannot begin with a number!\n"
+
+    elif not name[0].isalpha():
+        return "The name can only begin with Latin characters!\n"
+
+    if name not in contact_dictionary:
+        return "You cannot remove a phone entry from a non-existent user."
+
+    for phone_candidate in user_command[2:]:
+
+        if not re.search(number_format, phone_candidate):
+            return "The number(s) is invalid.\nThe number must be in the following format with 12 digits(d):\
+             +dd(ddd)ddd-dddd\n"
 
 
 def input_error(handler):
@@ -422,6 +491,17 @@ def input_error(handler):
 
         elif handler.__name__ == "handler_show":
             validation = validation_show(user_command, contact_dictionary)
+
+        elif handler.__name__ == "handler_remove":
+            validation = validation_remove(user_command, contact_dictionary)
+
+        elif handler.__name__ == "handler_remove_birthday":
+            validation = validation_remove_birthday(
+                user_command, name, contact_dictionary)
+
+        elif handler.__name__ == "handler_remove_phone":
+            validation = validation_remove_phone(
+                user_command, number_format, name, contact_dictionary)
 
         elif handler.__name__ == "handler_phone":
             validation = validation_phone(
@@ -624,6 +704,97 @@ def handler_showall(_, contact_dictionary: AddressBook, path_file: str) -> list:
     return all_list
 
 
+@ input_error
+def handler_remove(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> str:
+    """"remove ...": The bot remove a record contact in contact dictionary 
+    and save it in file(path_file). Instead of ... the user enters the name.
+
+    incoming: 
+    user_command -- list of user command (name of user)
+    contact_dictionary -- instance of AddressBook 
+    path_file -- is there path and filename of address book (in str) 
+    return: 
+    string -- answer
+    """
+    if contact_dictionary.get(user_command[1], None):
+
+        contact_dictionary.remove_record(user_command[1])
+
+        address_book_saver(contact_dictionary, path_file)
+
+        return f"Record '{user_command[1]}' deleted.\n"
+
+    else:
+        return f"Record '{user_command[1]}' not found.\n"
+
+
+@ input_error
+def handler_remove_birthday(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> str:
+    """"remove birthday ...": The bot remove a birthday record from contact in contact dictionary 
+    and save it in file(path_file). Instead of ... the user enters the name.
+
+    incoming: 
+    user_command -- list of user command (name of user)
+    contact_dictionary -- instance of AddressBook 
+    path_file -- is there path and filename of address book (in str) 
+    return: 
+    string -- answer
+    """
+    name = user_command[1]
+    if contact_dictionary.get(name, None):
+
+        if contact_dictionary[name].birthday:
+
+            contact_dictionary[name].remove_birthday()
+
+            address_book_saver(contact_dictionary, path_file)
+
+            return f"Birthday entry from '{name}' deleted.\n"
+
+        else:
+            return f"Birthday entry in record '{name}' not found.\n"
+
+    else:
+        return f"Record '{name}' not found.\n"
+
+
+@ input_error
+def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> str:
+    """"remove phone ...": The bot remove a phone record from contact in contact dictionary 
+    and save it in file(path_file). Instead of ... the user enters the name and phone 
+    number(s), necessarily with a space.
+
+    incoming: 
+    user_command -- list of user command (name of user)
+    contact_dictionary -- instance of AddressBook 
+    path_file -- is there path and filename of address book (in str) 
+    return: 
+    string -- answer
+    """
+    name = user_command[1]
+    if contact_dictionary.get(name, None):
+
+        if contact_dictionary[name].phones:
+
+            phone = user_command[2]
+            verdict = contact_dictionary[name].remove_phone(phone)
+
+            if verdict:
+
+                address_book_saver(contact_dictionary, path_file)
+
+                return f"Phone entry '{phone}' from '{name}' deleted.\n"
+
+            else:
+                return f"Phone entry '{phone}' in record '{name}' not found.\n"
+
+        else:
+            return f"Phone(s) entry in record '{name}' not found.\n"
+
+    else:
+        return f"Record '{name}' not found.\n"
+
+
 def find_users(search_strings: List[str], record: Record) -> bool:
     """Check a record for matching the search strings.
 
@@ -779,6 +950,11 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
         return f"No changes have been made\n{verdict[1]}"
 
 
+def handler_hello(*_) -> str:
+    """Reply to the greeting."""
+    return "How can I help you?\n"
+
+
 def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
     """All possible bot commands. Get a list of command and options, 
     a dictionary of contacts, and the path to an address book file. 
@@ -803,18 +979,16 @@ def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_
                    "show": handler_show,
                    "addbirthday": handler_add_birthday,
                    "changebirthday": handler_change_birthday,
-                   "find": handler_find, }
+                   "find": handler_find,
+                   "remove": handler_remove,
+                   "removephone": handler_remove_phone,
+                   "removebirthday": handler_remove_birthday, }
 
     if all_command.get(user_command[0].lower(), None):
 
         return all_command.get(user_command[0].lower())(user_command, contact_dictionary, path_file)
 
     return "It is unclear"
-
-
-def handler_hello(*_) -> str:
-    """Reply to the greeting."""
-    return "How can I help you?\n"
 
 
 def parser(user_input: str) -> List[str]:
@@ -843,6 +1017,12 @@ def parser(user_input: str) -> List[str]:
 
     elif len(words) >= 2 and words[0].lower() == "change" and words[1].lower() == "birthday":
         words = ["changebirthday"] + words[2:]
+
+    elif len(words) >= 2 and words[0].lower() == "remove" and words[1].lower() == "birthday":
+        words = ["removebirthday"] + words[2:]
+
+    elif len(words) >= 2 and words[0].lower() == "remove" and words[1].lower() == "phone":
+        words = ["removephone"] + words[2:]
 
     words[0] = words[0].lower()
 
