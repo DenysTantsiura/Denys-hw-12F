@@ -1,4 +1,14 @@
-""" !!!!!!!!!!! change it and add REMOVE BIRTHDAY!!!!!!!!!!!!!! check setter getter.... split into package modules
+""" !!!!!!!!!!! change it and add REMOVE Name/Phone/BIRTHDAY!!!!test!!!!!!!!!! check setter getter.... split into package modules
+1) to class Record add def remove_user, remove_birthday
+2) add handlers functions for bot-commands above
+3) add new validation-functions
+4) test all abov commands
+5) check all validation functions
+6) check setter and getter
+7) split into package modules
+8) test everything work commands
+9) fix description and others on docstrings and github
+
 Add the functionality of saving the address book to disk and restoring it from disk. 
 To do this, you can choose any data serialization/deserialization protocol that is convenient 
 for you and implement methods that will save all data to a file and load it from a file.
