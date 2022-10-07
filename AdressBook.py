@@ -1,5 +1,5 @@
 """ !!!!!!!!!!! check setter getter.... split into package modules
-5) check all validation functions and "carving" to dict...
+5) check all validation functions 
 6) check setter and getter
 7) split into package modules
 8) test everything work commands
@@ -116,7 +116,7 @@ class Phone(Field):
     @Field.value.setter
     def value(self, new_value: str):
 
-        if re.search(r'^\+[0-9)(-]{12,16}$', new_value):
+        if re.search(r"^\+[0-9)(-]{12,16}$", new_value):
             self._value = self.__preformating(new_value)
 
         else:
@@ -338,7 +338,7 @@ def input_error(handler):
     """
     def exception_function(user_command: list, contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
         """decorator"""
-        number_format = r'^\+[0-9)(-]{12,16}$'
+        number_format = r"^\+[0-9)(-]{12,16}$"
         validation = None
 
         if len(user_command) > 1:
@@ -347,51 +347,23 @@ def input_error(handler):
         else:
             name = None
 
-        if handler.__name__ == "handler_showall" or handler.__name__ == "handler_find":
+        validation_functions = {
+            "handler_add": validation_add,
+            "handler_add_birthday": validation_birthday,
+            "handler_add_phone": validation_add_phone,
+            "handler_change": validation_change,
+            "handler_change_birthday": validation_birthday,
+            "handler_find": validation_find,
+            "handler_phone": validation_phone,
+            "handler_remove": validation_remove,
+            "handler_remove_birthday": validation_remove_birthday,
+            "handler_remove_phone": validation_remove_phone,
+            "handler_show": validation_show,
+            "handler_showall": validation_showall,
+        }
 
-            if not contact_dictionary:
-                return "No contact records available\n"
-
-            if handler.__name__ == "handler_find" and not name:
-                return "There is no search query\n"
-
-        elif handler.__name__ == "handler_show":
-            validation = validation_show(user_command, contact_dictionary)
-
-        elif handler.__name__ == "handler_remove":
-            validation = validation_remove(user_command, contact_dictionary)
-
-        elif handler.__name__ == "handler_remove_birthday":
-            validation = validation_remove_birthday(
-                user_command, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_remove_phone":
-            validation = validation_remove_phone(
-                user_command, number_format, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_phone":
-            validation = validation_phone(
-                user_command, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_add_phone":
-            validation = validation_add_phone(
-                user_command, number_format, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_add_birthday":
-            validation = validation_birthday(
-                user_command, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_add":
-            validation = validation_add(
-                user_command, number_format, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_change_birthday":
-            validation = validation_birthday(
-                user_command, name, contact_dictionary)
-
-        elif handler.__name__ == "handler_change":
-            validation = validation_change(
-                user_command, number_format, name, contact_dictionary)
+        validation = validation_functions[handler.__name__](
+            user_command, number_format, name, contact_dictionary)
 
         if validation:
             return validation
@@ -824,7 +796,8 @@ def validation_add_phone(user_command: list, number_format: str, name: str, cont
              +dd(ddd)ddd-dddd\n"
 
 
-def validation_birthday(user_command: list, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+# user_command, number_format, name, contact_dictionary
+def validation_birthday(user_command: list, _, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available\n"
@@ -869,7 +842,17 @@ def validation_change(user_command: list, number_format: str, name: str, contact
         The number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd\n"
 
 
-def validation_phone(_, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_find(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    if not contact_dictionary:
+        return "No contact records available\n"
+
+    if not name:
+        return "There is no search query\n"
+
+
+# user_command, number_format, name, contact_dictionary
+def validation_phone(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available\n"
@@ -884,7 +867,8 @@ def validation_phone(_, name: str, contact_dictionary: AddressBook) -> Union[str
         return "The name can only begin with Latin characters!\n"
 
 
-def validation_remove(user_command: list, contact_dictionary: AddressBook) -> Union[str, None]:
+# user_command, number_format, name, contact_dictionary
+def validation_remove(user_command: list, _, _a, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     name = user_command[1]
     if not contact_dictionary:
@@ -903,7 +887,8 @@ def validation_remove(user_command: list, contact_dictionary: AddressBook) -> Un
         return "You cannot remove a non-existent user."
 
 
-def validation_remove_birthday(user_command: list, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+# user_command, number_format, name, contact_dictionary
+def validation_remove_birthday(user_command: list, _, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available\n"
@@ -945,7 +930,8 @@ def validation_remove_phone(user_command: list, number_format: str, name: str, c
              +dd(ddd)ddd-dddd\n"
 
 
-def validation_show(user_command: list, contact_dictionary: AddressBook) -> Union[str, None]:
+# user_command, number_format, name, contact_dictionary
+def validation_show(user_command: list, _, _a, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available\n"
@@ -958,6 +944,12 @@ def validation_show(user_command: list, contact_dictionary: AddressBook) -> Unio
 
     elif not user_command[1][0].isalpha():
         return "The name can only begin with Latin characters!\n"
+
+
+def validation_showall(_, _a, _b, contact_dictionary: AddressBook) -> Union[str, None]:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    if not contact_dictionary:
+        return "No contact records available\n"
 
 
 def handler_exit(*_) -> str:
