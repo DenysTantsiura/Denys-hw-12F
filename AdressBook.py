@@ -1,5 +1,4 @@
 """ !!!!!!!!!!! check setter getter.... split into package modules
-5) check all validation functions 
 6) check setter and getter
 7) split into package modules
 8) test everything work commands
@@ -760,11 +759,8 @@ def validation_add(user_command: list, number_format: str, name: str, contact_di
     if name in contact_dictionary:
         return "Such an entry is already in the book. Add or change a number."
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if len(user_command) >= 2:
 
@@ -780,11 +776,8 @@ def validation_add_phone(user_command: list, number_format: str, name: str, cont
     if len(user_command) < 3:  # or not name:
         return "Give me name and new phone(s) please\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if name not in contact_dictionary:
         return "You cannot add a phone to a non-existent user. Make a user record first."
@@ -805,11 +798,8 @@ def validation_birthday(user_command: list, _, name: str, contact_dictionary: Ad
     if len(user_command) < 3:  # or not name:
         return "Give me a name and birthday, please\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if 1900 > int(user_command[2].split("-")[0]) > datetime.now().year - 16:
         return "The year of birth is not correct!\n"
@@ -831,11 +821,8 @@ def validation_change(user_command: list, number_format: str, name: str, contact
     if len(user_command) < 4:  # or not name:
         return "Give me name and 2 phones please (current and new)\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if not re.search(number_format, user_command[2]):
         return "The number(s) is invalid: contains invalid characters or incorrect length\n \
@@ -860,28 +847,21 @@ def validation_phone(_, _a, name: str, contact_dictionary: AddressBook) -> Union
     if not name:  # len(user_command) < 2 or not name:
         return "Give me a name too, please\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
 
 # user_command, number_format, name, contact_dictionary
-def validation_remove(user_command: list, _, _a, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_remove(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    name = user_command[1]
     if not contact_dictionary:
         return "No contact records available\n"
 
-    if len(user_command) < 2:
+    if not name:
         return "Give me a name, please\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if name not in contact_dictionary:
         return "You cannot remove a non-existent user."
@@ -896,11 +876,8 @@ def validation_remove_birthday(user_command: list, _, name: str, contact_diction
     if len(user_command) < 2:
         return "Give me a name, please\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if name not in contact_dictionary:
         return "You cannot remove birthday entry from a non-existent user."
@@ -911,14 +888,11 @@ def validation_remove_phone(user_command: list, number_format: str, name: str, c
     if not contact_dictionary:
         return "No contact records available\n"
 
-    if len(user_command) < 2:
+    if not name:
         return "Give me a name, please\n"
 
-    if name[0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not name[0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
     if name not in contact_dictionary:
         return "You cannot remove a phone entry from a non-existent user."
@@ -931,19 +905,16 @@ def validation_remove_phone(user_command: list, number_format: str, name: str, c
 
 
 # user_command, number_format, name, contact_dictionary
-def validation_show(user_command: list, _, _a, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_show(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available\n"
 
-    if len(user_command) < 2:
+    if not name:
         return "Give me a name, please\n"
 
-    if user_command[1][0].isdigit():
-        return "A name cannot begin with a number!\n"
-
-    elif not user_command[1][0].isalpha():
-        return "The name can only begin with Latin characters!\n"
+    if name[0].isdigit() or not name[0].isalpha():
+        return "A name cannot begin with a number and can only begin with Latin characters!\n"
 
 
 def validation_showall(_, _a, _b, contact_dictionary: AddressBook) -> Union[str, None]:
