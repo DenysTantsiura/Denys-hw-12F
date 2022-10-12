@@ -1,8 +1,8 @@
 """ !!!!!!!!!!! check setter getter.... split into package modules
-6) check setter and getter
+6) check setter and getter, and open in pycharm
 7) split into package modules
 8) test everything work commands
-9) fix description and others on docstrings and github
+9) fix description and others on docstrings and GitHub
 
 Add the functionality of saving the address book to disk and restoring it from disk. 
 To do this, you can choose any data serialization/deserialization protocol that is convenient 
@@ -39,7 +39,7 @@ class AddressBook(UserDict):
         self.data[record.name.value] = record
 
     def iterator(self, n_count: int) -> list:
-        "Return(yield) of n_count records of all AddressBook."
+        """Return(yield) of n_count records of all AddressBook."""
         current_value = 0
         dictionary_iterator = iter(self.data)
 
@@ -66,30 +66,34 @@ class AddressBook(UserDict):
 class Field:  # super for all base fields
     """A base class with a simple field."""
 
-    def __init__(self, value):
-        self._value = None
-        self.value = value
+    def __init__(self):
+        self.__value = None
 
     def __str__(self):
         return f"{self.value}"
 
     @property
     def value(self):
-        return self._value
+        return self.__value
 
     @value.setter
-    def value(self, new_value):
-        self._value = new_value
+    def value(self, new_value: str):
+        self.__value = new_value
 
 
 class Birthday(Field):
     """Class of Birthday data."""
+    #
+    # def __init__(self):
+    #     super().__init__()
+
     @Field.value.setter
     def value(self, new_value: str):
         birthday_data = datetime.strptime(new_value, "%Y-%m-%d")
 
         if birthday_data:
-            self._value = birthday_data
+            # super().value = birthday_data    self._Field__value = birthday_data
+            self._Field__value = birthday_data
 
         else:
             print("Incorrect birthday...")
@@ -104,7 +108,8 @@ class Name(Field):
     def value(self, new_value: str):
 
         if new_value[0] not in "_0123456789!@$%^&*()-+?<>~`|\\/":
-            self._value = new_value
+            # super().value = new_value     self._Field__value = new_value
+            self._Field__value = new_value
 
         else:
             print("At the beginning there can be only a Latin letter")
@@ -116,7 +121,8 @@ class Phone(Field):
     def value(self, new_value: str):
 
         if re.search(r"^\+[0-9)(-]{12,16}$", new_value):
-            self._value = self.__preformating(new_value)
+            # super().value = self.__preformating(new_value)    self._Field__value = self.__preformating(new_value)
+            self._Field__value = self.__preformating(new_value)
 
         else:
             print("Incorrect phone...")
@@ -139,7 +145,8 @@ class Record:
     """Record class of users information"""
 
     def __init__(self, name: str, *phones: str):
-        self.name = Name(name)
+        self.name = Name()
+        self.name.value = name
         self.phones = []
         self.birthday = None
 
@@ -155,7 +162,8 @@ class Record:
         """Adds a new entry for the user's birthday to the address book."""
         if not self.birthday:
 
-            self.birthday = Birthday(birthday)
+            self.birthday = Birthday()
+            self.birthday.value = birthday
 
             return True,
 
@@ -165,17 +173,18 @@ class Record:
 
     def add_phone(self, phone_new: str) -> bool:
         """Adds a new entry for the user's phone to the address book."""
-        phone_new = Phone(phone_new)
+        phone_new1 = Phone()
+        phone_new1.value = phone_new
 
         for phone in self.phones:
 
-            if phone_new == phone.value:
+            if phone_new1 == phone.value:
 
-                print(f"{phone_new} already recorded for {self.name.value}")
+                print(f"{phone_new1} already recorded for {self.name.value}")
 
                 return False
 
-        self.phones.append(phone_new)
+        self.phones.append(phone_new1)
 
         return True
 
@@ -187,14 +196,23 @@ class Record:
 
         else:
 
-            self.birthday = Birthday(birthday)
+            self.birthday = Birthday()
+            self.birthday.value = birthday
 
             return True,
 
     def change_phone(self, phone_to_change: str, phone_new: str) -> tuple:
         """Modify an existing user's phone entry in the address book."""
-        phone_to_change = Phone(phone_to_change).value
-        phone_new = Phone(phone_new).value
+        phone_to_change1 = Phone()  # class instanse
+        # let's convert it to the form of recording in the class (pre-format)
+        phone_to_change1.value = phone_to_change
+        # we will get the formatted value that was recorded
+        phone_to_change = phone_to_change1.value
+        phone_new1 = Phone()  # class instanse
+        # let's convert it to the form of recording in the class (pre-format)
+        phone_new1.value = phone_new
+        # we will get the formatted value that was recorded
+        phone_new = phone_new1.value
         verdict = False
 
         for phone in self.phones:
@@ -213,7 +231,7 @@ class Record:
             if phone.value == phone_to_change:
 
                 self.phones.remove(phone)
-                self.phones.insert(index, Phone(phone_new))
+                self.phones.insert(index, phone_new1)
 
                 return True,
 
@@ -243,7 +261,11 @@ class Record:
 
     def remove_phone(self, phone_to_remove: str) -> Union[bool, None]:
         """Deleting a phone entry from a user entry in the address book."""
-        phone_to_remove = Phone(phone_to_remove).value
+        phone_to_remove1 = Phone()  # class instanse
+        # let's convert it to the form of recording in the class (pre-format)
+        phone_to_remove1.value = phone_to_remove
+        # we will get the formatted value that was recorded
+        phone_to_remove = phone_to_remove1.value
 
         for phone in self.phones:
 
@@ -338,7 +360,6 @@ def input_error(handler):
     def exception_function(user_command: list, contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
         """decorator"""
         number_format = r"^\+[0-9)(-]{12,16}$"
-        validation = None
 
         if len(user_command) > 1:
             name = user_command[1]
@@ -359,9 +380,10 @@ def input_error(handler):
             "handler_remove_phone": validation_remove_phone,
             "handler_show": validation_show,
             "handler_showall": validation_showall,
+            "unknown": lambda *_: "Unknown command...",
         }
-
-        validation = validation_functions[handler.__name__](
+        # validation = validation_functions[handler.__name__](user_command, number_format, name, contact_dictionary)
+        validation = validation_functions.get(handler.__name__, validation_functions["unknown"])(
             user_command, number_format, name, contact_dictionary)
 
         if validation:
@@ -719,7 +741,7 @@ def handler_show(user_command: List[str], contact_dictionary: AddressBook, _=Non
 
 
 @ input_error
-def handler_showall(_, contact_dictionary: AddressBook, path_file: str) -> list:
+def handler_showall(_, contact_dictionary: AddressBook, _a) -> list:
     """"show all": The bot outputs all saved contacts.
 
     :incoming: 
@@ -751,7 +773,8 @@ def handler_showall(_, contact_dictionary: AddressBook, path_file: str) -> list:
     return all_list
 
 
-def validation_add(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_add(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
+        Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not name:  # len(user_command) < 2:
         return "Give me name OR name and phone please\n"
@@ -771,7 +794,8 @@ def validation_add(user_command: list, number_format: str, name: str, contact_di
                 +dd(ddd)ddd-dddd\n"
 
 
-def validation_add_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_add_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
+        Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if len(user_command) < 3:  # or not name:
         return "Give me name and new phone(s) please\n"
@@ -813,7 +837,8 @@ def validation_birthday(user_command: list, _, name: str, contact_dictionary: Ad
             return "The calendar date is not possible!\n"
 
 
-def validation_change(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_change(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
+        Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available. You can add records\n"
@@ -883,7 +908,8 @@ def validation_remove_birthday(user_command: list, _, name: str, contact_diction
         return "You cannot remove birthday entry from a non-existent user."
 
 
-def validation_remove_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_remove_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
+        Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
         return "No contact records available\n"
@@ -961,7 +987,7 @@ def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_
 
         return all_command.get(user_command[0].lower())(user_command, contact_dictionary, path_file)
 
-    return "It is unclear"
+    return "It is unclear. Unknown command..."
 
 
 def parser(user_input: str) -> List[str]:
