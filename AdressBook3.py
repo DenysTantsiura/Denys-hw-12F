@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line 1201 main... parser
+NEXT line "docstrings" main_hendler & parser
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -60,7 +60,7 @@ OTHER_MESSAGE = {
     'next_page':['Press Enter for next Volume... ',],
     'Bye':['Good bye!',],
     'START':['Can I help you?\n',],
-    '':['',],
+    'Unknown':['It is unclear. Unknown command...',],
     '':['',],
     '':['',],
     '':['',],
@@ -70,6 +70,7 @@ OTHER_MESSAGE = {
     '':['',],}
 
 
+
 class AddressBook(UserDict):
     """A class of Address book."""
 
@@ -77,7 +78,7 @@ class AddressBook(UserDict):
         ABOOK0 = OTHER_MESSAGE.get('ABook',[AMBUSH])[0]
         return f'{ABOOK0}{self.data})'
 
-    def add_record(self, record):
+    def add_record(self, record) -> None:  # record: Record
         """Adds a new record to the address book dictionary."""
         self.data[record.name.value] = record
 
@@ -1105,6 +1106,22 @@ def handler_exit(*_) -> str:
     """Reply to the exit command."""
     return "Good bye!"
 
+all_command = {"hello": handler_hello,
+                "add": handler_add,
+                "add_phone": handler_add_phone,
+                "change": handler_change,
+                "phone": handler_phone,
+                "show_all": handler_showall,
+                "good_bye": handler_exit,
+                "close": handler_exit,
+                "exit": handler_exit,
+                "show": handler_show,
+                "add_birthday": handler_add_birthday,
+                "change_birthday": handler_change_birthday,
+                "find": handler_find,
+                "remove": handler_remove,
+                "remove_phone": handler_remove_phone,
+                "remove_birthday": handler_remove_birthday, }
 
 def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
     """All possible bot commands. Get a list of command and options, 
@@ -1118,28 +1135,9 @@ def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_
     :return: 
     :the result of the certain function is a string or a list of strings
     """
-    all_command = {"hello": handler_hello,
-                   "add": handler_add,
-                   "addphone": handler_add_phone,
-                   "change": handler_change,
-                   "phone": handler_phone,
-                   "showall": handler_showall,
-                   "goodbye": handler_exit,
-                   "close": handler_exit,
-                   "exit": handler_exit,
-                   "show": handler_show,
-                   "addbirthday": handler_add_birthday,
-                   "changebirthday": handler_change_birthday,
-                   "find": handler_find,
-                   "remove": handler_remove,
-                   "removephone": handler_remove_phone,
-                   "removebirthday": handler_remove_birthday, }
-
-    if all_command.get(user_command[0].lower(), None):
-
-        return all_command.get(user_command[0].lower())(user_command, contact_dictionary, path_file)
-
-    return "It is unclear. Unknown command..."
+    return all_command.get(user_command[0], lambda *args: None)(user_command, \
+        contact_dictionary, path_file) \
+        or OTHER_MESSAGE.get('Unknown',[AMBUSH])[0]
 
 
 def parser(user_input: str) -> List[str]:
@@ -1147,37 +1145,20 @@ def parser(user_input: str) -> List[str]:
     return it to the list, where the first element is the command, 
     the others are parameters.
 
+
     :incoming: 
     :user_input -- string from user
     :return: 
     :list of comands (list of strings)
     """
-    words = user_input.strip().split(" ")
+    command_line = user_input.strip().replace(' ','~').lower()
+    all_commands = sorted([el.replace('_','~') for el in all_command], key=len)[::-1]   
+    for command in all_commands:
+        if command_line.startswith(command):
+            command.replace('~','_')
+            return [command.replace('~','_')] + [word for word in user_input[len(command):].split(" ") if word]
 
-    if len(words) >= 2 and words[0].lower() == "good" and words[1].lower() == "bye":
-        words = ["goodbye"]
-
-    elif len(words) >= 2 and words[1].lower() == "all" and words[0].lower() == "show":
-        words = ["showall"]
-
-    elif len(words) >= 2 and words[1].lower() == "phone" and words[0].lower() == "add":
-        words = ["addphone"] + words[2:]
-
-    elif len(words) >= 2 and words[0].lower() == "add" and words[1].lower() == "birthday":
-        words = ["addbirthday"] + words[2:]
-
-    elif len(words) >= 2 and words[0].lower() == "change" and words[1].lower() == "birthday":
-        words = ["changebirthday"] + words[2:]
-
-    elif len(words) >= 2 and words[0].lower() == "remove" and words[1].lower() == "birthday":
-        words = ["removebirthday"] + words[2:]
-
-    elif len(words) >= 2 and words[0].lower() == "remove" and words[1].lower() == "phone":
-        words = ["removephone"] + words[2:]
-
-    words[0] = words[0].lower()
-
-    return words
+    return user_input.strip().split(" ")  #  OTHER_MESSAGE.get('Unknown',[AMBUSH])[0]
 
 
 def main() -> NoReturn:
@@ -1198,7 +1179,7 @@ def main() -> NoReturn:
 
     while True:
         user_command = input(OTHER_MESSAGE.get('START',[AMBUSH])[0])
-        user_request = parser(user_command)
+        user_request = parser(user_command)  # ['remove_phone', '+38000001', '+5555578']
         bot_answer = main_handler(
             user_request, contact_dictionary, new_path_file)
 
