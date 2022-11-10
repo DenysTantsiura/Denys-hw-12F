@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line AddressBook(User...) line 73
+NEXT line 1201 main... parser
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -9,19 +9,30 @@ import re
 import sys
 from typing import List, NoReturn, Union
 
+AMBUSH = 'AMBUSH!'
+TO_NEXT_FILE_NAME = 'new_one_'
+DEFAULT_FILE_ADDRESS_BOOK = 'ABook.data'
 
-PREFORMATING_NUMBER = r'^\+[0-9)(-]{12,16}$'
+PREFORMATING_PHONE = r'^\+[0-9)(-]{12,16}$'
 PREFORMATING_EMAIL1 = r'\b[a-zA-z][\w_.]+@[a-zA-z]+\.[a-zA-z]{2,}[ ]'
 PREFORMATING_EMAIL2 = r'\b[a-zA-z][\w_.]+@[a-zA-z]+\.[a-zA-z]+\.[a-zA-z]{2,}'
 
-
+ERROR_MESSAGE = {
+    'UnpicklingError':['The File',' is corrupted, my apologies.',],
+    'UnpicklingOthers':['Is the File',' corrupted? ',],
+    'OpenFile':['No access to File',', error: ',],
+    '':['',],
+    '':['',],
+    '':['',],
+    '':['',],
+    '':['',],}
 
 WARNING_MESSAGE = {
     'name':'At the beginning there can be only a Latin letter!',
     'birthday':'Incorrect or nonexistent date, entry must be in year-month-day format (YYYY-MM-DD).',
     'phone':'The number is obviously incorrect, the value should start with "+" and have 12 digits.',
     'email':'The e-mail is obviously incorrect.',
-    '':'',
+    'main':'Something happened. Will you try again?',
     '':'',
     '':'',
     '':'',
@@ -43,12 +54,12 @@ WARNING_MESSAGE = {
 # OTHER_MESSAGE
 OTHER_MESSAGE = {
     'Record': ['\n\nRecord(Name: ', '; Phones: ', '; Birthday: ', ';\n\te-mail: ', ';\n\t details: ', ':\n\t related information: ',],
-    'RBirthday':['Birthday already recorded for ','. You can change it.','Birthday not specified for ','. You can add it.'],
+    'RBirthday':['Birthday already recorded for ','. You can change it.','Birthday not specified for ','. You can add it.',],
     'RPhone':[' already recorded for ',' already recorded for ',' not specified in the contact ',],
     'ABook':['AddressBook(Records:',],
-    '':['',],
-    '':['',],
-    '':['',],
+    'next_page':['Press Enter for next Volume... ',],
+    'Bye':['Good bye!',],
+    'START':['Can I help you?\n',],
     '':['',],
     '':['',],
     '':['',],
@@ -63,7 +74,7 @@ class AddressBook(UserDict):
     """A class of Address book."""
 
     def __str__(self) -> str:
-        ABOOK0 = OTHER_MESSAGE.get('ABook',['AMBUSH!'])[0]
+        ABOOK0 = OTHER_MESSAGE.get('ABook',[AMBUSH])[0]
         return f'{ABOOK0}{self.data})'
 
     def add_record(self, record):
@@ -131,7 +142,7 @@ class Name(Field):
             self._Field__value = new_value
 
         else:
-            print(WARNING_MESSAGE.get('name','AMBUSH!'))
+            print(WARNING_MESSAGE.get('name',AMBUSH))
 
 
 class Birthday(Field):
@@ -144,7 +155,7 @@ class Birthday(Field):
             self._Field__value = birthday_data
 
         else:
-            print(WARNING_MESSAGE.get('birthday','AMBUSH!'))
+            print(WARNING_MESSAGE.get('birthday', AMBUSH))
 
     def __str__(self) -> str:
         return f"{self.value.date()}"
@@ -155,11 +166,11 @@ class Phone(Field):
     @Field.value.setter
     def value(self, new_value: str):
 
-        if re.search(PREFORMATING_NUMBER, new_value):
+        if re.search(PREFORMATING_PHONE, new_value):
             self._Field__value = self.__preformating(new_value)
 
         else:
-            print(WARNING_MESSAGE.get('phone','AMBUSH!'))
+            print(WARNING_MESSAGE.get('phone',AMBUSH))
     
     @Field.bloke.setter
     def bloke(self, new_bloke: str):
@@ -196,7 +207,7 @@ class Email(Field):
             self._Field__value = self.new_value.strip()
 
         else:
-            print(WARNING_MESSAGE.get('email','AMBUSH!'))
+            print(WARNING_MESSAGE.get('email',AMBUSH))
     
     @Field.bloke.setter
     def bloke(self, new_bloke: str):
@@ -212,7 +223,6 @@ class RelatedInformation(Field):
     @Field.bloke.setter
     def bloke(self, new_bloke: str):
         self._Field__bloke = new_bloke
-
 
 
 class Record:
@@ -233,12 +243,12 @@ class Record:
                 self.add_phone(phone)
 
     def __str__(self) -> str:
-        NAME = OTHER_MESSAGE.get('Record',['AMBUSH!'])[0]
-        PHONES = OTHER_MESSAGE.get('Record',['AMBUSH!']*2)[1]
-        BIRTHDAY = OTHER_MESSAGE.get('Record',['AMBUSH!']*3)[2]
-        EMAIL = OTHER_MESSAGE.get('Record',['AMBUSH!']*4)[3]
-        DETAILS = OTHER_MESSAGE.get('Record',['AMBUSH!']*5)[4]
-        RELATED = OTHER_MESSAGE.get('Record',['AMBUSH!']*6)[5]
+        NAME = OTHER_MESSAGE.get('Record',[AMBUSH])[0]
+        PHONES = OTHER_MESSAGE.get('Record',[AMBUSH]*2)[1]
+        BIRTHDAY = OTHER_MESSAGE.get('Record',[AMBUSH]*3)[2]
+        EMAIL = OTHER_MESSAGE.get('Record',[AMBUSH]*4)[3]
+        DETAILS = OTHER_MESSAGE.get('Record',[AMBUSH]*5)[4]
+        RELATED = OTHER_MESSAGE.get('Record',[AMBUSH]*6)[5]
 
         return f'{NAME}{self.name}{PHONES}{self.phones}{BIRTHDAY}'\
             f'{self.birthday}{EMAIL}{self.emails}{DETAILS}{self.details}'\
@@ -254,8 +264,8 @@ class Record:
             return True,
 
         else:
-            BIRTHDAY0 = OTHER_MESSAGE.get('RBirthday',['AMBUSH!'])[0]
-            BIRTHDAY1 = OTHER_MESSAGE.get('RBirthday',['AMBUSH!']*2)[1]
+            BIRTHDAY0 = OTHER_MESSAGE.get('RBirthday',[AMBUSH])[0]
+            BIRTHDAY1 = OTHER_MESSAGE.get('RBirthday',[AMBUSH]*2)[1]
             return False, f'{BIRTHDAY0}{self.name.value}{BIRTHDAY1}'
 
     def add_phone(self, phone_new: str) -> bool:
@@ -267,7 +277,7 @@ class Record:
 
             if phone_new1 == phone.value:
                 
-                PHONE0 = OTHER_MESSAGE.get('RPhone',['AMBUSH!'])[0]
+                PHONE0 = OTHER_MESSAGE.get('RPhone',[AMBUSH])[0]
                 print(f'{phone_new1}{PHONE0}{self.name.value}')
 
                 return False
@@ -280,8 +290,8 @@ class Record:
         """Modify an existing user's birthday entry in the address book."""
         if not self.birthday:
             
-            BIRTHDAY2 = OTHER_MESSAGE.get('RBirthday',['AMBUSH!']*3)[2]
-            BIRTHDAY3 = OTHER_MESSAGE.get('RBirthday',['AMBUSH!']*4)[3]
+            BIRTHDAY2 = OTHER_MESSAGE.get('RBirthday',[AMBUSH]*3)[2]
+            BIRTHDAY3 = OTHER_MESSAGE.get('RBirthday',[AMBUSH]*4)[3]
             return False, f'{BIRTHDAY2}{self.name.value}{BIRTHDAY3}'
 
         else:
@@ -300,14 +310,14 @@ class Record:
         for phone in self.phones:
 
             if phone.value == phone_new:  # new number already in record
-                PHONE1 = OTHER_MESSAGE.get('RPhone',['AMBUSH!']*2)[1]
+                PHONE1 = OTHER_MESSAGE.get('RPhone',[AMBUSH]*2)[1]
                 return False, f'{phone_new}{PHONE1}{self.name.value}'
 
             if phone.value == phone_to_change:  # old number not exist in record
                 verdict = True
 
         if not verdict:
-            PHONE2 = OTHER_MESSAGE.get('RPhone',['AMBUSH!']*3)[2]
+            PHONE2 = OTHER_MESSAGE.get('RPhone',[AMBUSH]*3)[2]
             return verdict, f'{phone_to_change}{PHONE2}{self.name.value}'
 
         for index, phone in enumerate(self.phones):
@@ -355,7 +365,7 @@ class Record:
 
                 return True
 
-        PHONE2 = OTHER_MESSAGE.get('RPhone',['AMBUSH!']*3)[2]      
+        PHONE2 = OTHER_MESSAGE.get('RPhone',[AMBUSH]*3)[2]      
         print(f'{phone_to_remove}{PHONE2}{self.name.value}')
 
     def years_old(self) -> int:
@@ -371,12 +381,75 @@ class Record:
 
 
 
+def helper_try_open_file(path_file: str) -> str:
+    """Checks if the database file exists and checks if the filename is free if not.
+    If exist folder with path_file file name, then return new free file name. 
+    Return unoccupied name of file (string).
+
+        Parameters:
+            path_file (str): Is proposed name of file.
+
+        Returns:
+            path_file (str): Unoccupied name of file.
+    """
+    if os.path.isdir(path_file):
+
+        while os.path.isdir(path_file):
+
+            path_file = os.path.join(path_file.parent, TO_NEXT_FILE_NAME + path_file.name)
+
+    return path_file
+
+
+def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
+    """Create empty address book (AddressBook) if no file on path_file.
+    Or, try to load address book database (read) from file. 
+    Return loaded address book (AddressBook) and path for address book file.
+
+        Parameters:
+            path_file (str): Is existed file (name or name with path).
+
+        Returns:
+            contact_dictionary (AddressBook): Loaded from file or new empty class.
+            path_file (str): Name of file for save address book in future steps.
+                Unoccupied name of file, if apeared exeption. # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    """
+    if not os.path.exists(path_file):
+        contact_dictionary = AddressBook()
+        address_book_saver(contact_dictionary, path_file)
+        return contact_dictionary, path_file
+
+    try:
+        with open(path_file, "rb") as fh:
+            try:
+                contact_dictionary = pickle.load(fh)
+                return contact_dictionary, path_file
+            except pickle.UnpicklingError:
+                ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingError',[AMBUSH])[0]
+                ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingError',[AMBUSH]*2)[1]
+                print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}')
+                contact_dictionary = AddressBook()
+
+            except Exception as error_:
+                ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingOthers',[AMBUSH])[0]
+                ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingOthers',[AMBUSH]*2)[1]
+                print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}{repr(error_)}')
+                contact_dictionary = AddressBook()
+
+    except Exception as error_:  # !!!!!!! No access for reading ?????????????????????????????
+        ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile',[AMBUSH])[0]
+        ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile',[AMBUSH]*2)[1]
+        print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}{repr(error_)}')
+        contact_dictionary = AddressBook()
+
+    while os.path.exists(path_file):
+        path_file = os.path.join(path_file.parent, TO_NEXT_FILE_NAME + path_file.name)
+
+    return contact_dictionary, path_file
+
+
 
 # --------------------------------------------------------------------------------
-
-
-
-
 
 
 def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> None:
@@ -426,22 +499,6 @@ def find_users(search_strings: List[str], record: Record) -> bool:
 
     return False
 
-
-def helper_try_open_file(path_file: str) -> str:
-    """Checks if the database file exists and checks if the filename is free if not.
-    Return unoccupied name of file (string).
-
-    :incoming: 
-    :path_file -- is proposed name of file (str)
-    :return: 
-    :path_file -- unoccupied name of file
-    """
-    if os.path.isdir(path_file):
-
-        while os.path.isdir(path_file):
-            path_file = "new_one_" + path_file
-
-    return path_file
 
 
 def input_error(handler):
@@ -1133,20 +1190,14 @@ def main() -> NoReturn:
         path_file = sys.argv[1]
 
     except IndexError:
-        path_file = "ABook.data"
+        path_file = DEFAULT_FILE_ADDRESS_BOOK
 
     new_path_file = helper_try_open_file(path_file)
 
-    if os.path.exists(new_path_file):
-        with open(new_path_file, "rb") as fh:
-            contact_dictionary = pickle.load(fh)
-
-    else:
-        contact_dictionary = AddressBook()
-        address_book_saver(contact_dictionary, new_path_file)
+    contact_dictionary, new_path_file = helper_try_load_file(new_path_file)
 
     while True:
-        user_command = input()
+        user_command = input(OTHER_MESSAGE.get('START',[AMBUSH])[0])
         user_request = parser(user_command)
         bot_answer = main_handler(
             user_request, contact_dictionary, new_path_file)
@@ -1161,14 +1212,14 @@ def main() -> NoReturn:
                 if volume:
 
                     print(volume)
-                    input("Press Enter for next Volume... ")
+                    input(OTHER_MESSAGE.get('next_page',[AMBUSH])[0])
 
         else:
-            print("Something happened. Will you try again?")
+            print(WARNING_MESSAGE.get('main', AMBUSH))
 
-        if bot_answer == "Good bye!":
+        if bot_answer == OTHER_MESSAGE.get('Bye',[AMBUSH])[0]:
             break
 
 
-if __name__ == "__main__":
-    exit(main())
+if __name__ == '__main__':
+    main()
