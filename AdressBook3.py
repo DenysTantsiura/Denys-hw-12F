@@ -198,6 +198,7 @@ class Details(Field):
     def bloke(self, new_bloke: str):
         self._Field__bloke = new_bloke
 
+
 class Email(Field):
     """Class of user Email."""
     @Field.value.setter
@@ -381,7 +382,6 @@ class Record:
                 else datetime.now().year - self.birthday.value.year
 
 
-
 def helper_try_open_file(path_file: str) -> str:
     """Checks if the database file exists and checks if the filename is free if not.
     If exist folder with path_file file name, then return new free file name. 
@@ -532,7 +532,7 @@ def input_error(handler):
             "handler_remove_birthday": validation_remove_birthday,
             "handler_remove_phone": validation_remove_phone,
             "handler_show": validation_show,
-            "handler_showall": validation_showall,
+            "handler_show_all": validation_showall,
             "unknown": lambda *_: "Unknown command...",
         }
         # validation = validation_functions[handler.__name__](user_command, number_format, name, contact_dictionary)
@@ -894,7 +894,7 @@ def handler_show(user_command: List[str], contact_dictionary: AddressBook, _=Non
 
 
 @ input_error
-def handler_showall(_, contact_dictionary: AddressBook, _a) -> list:
+def handler_show_all(_, contact_dictionary: AddressBook, _a) -> list:
     """"show all": The bot outputs all saved contacts.
 
     :incoming: 
@@ -1106,12 +1106,13 @@ def handler_exit(*_) -> str:
     """Reply to the exit command."""
     return "Good bye!"
 
+
 all_command = {"hello": handler_hello,
                 "add": handler_add,
                 "add_phone": handler_add_phone,
                 "change": handler_change,
                 "phone": handler_phone,
-                "show_all": handler_showall,
+                "show_all": handler_show_all,
                 "good_bye": handler_exit,
                 "close": handler_exit,
                 "exit": handler_exit,
@@ -1121,19 +1122,23 @@ all_command = {"hello": handler_hello,
                 "find": handler_find,
                 "remove": handler_remove,
                 "remove_phone": handler_remove_phone,
-                "remove_birthday": handler_remove_birthday, }
+                "remove_birthday": handler_remove_birthday, 
+                }
+
 
 def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
     """All possible bot commands. Get a list of command and options, 
     a dictionary of contacts, and the path to an address book file. 
     Call a certain function and return a response to a command request.
 
-    :incoming: 
-    :user command -- list of user command (list of command and options)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str)
-    :return: 
-    :the result of the certain function is a string or a list of strings
+        Parameters:
+            user_command (List[str]): list of user command (list of command and options).
+            contact_dictionary (AddressBook): Instance of AddressBook.
+            path_file (str): Is there path and filename of address book (in str).
+
+        Returns:
+            The result of the corresponding function (list): The result of the\
+                 certain function is a string or a list of strings.
     """
     return all_command.get(user_command[0], lambda *args: None)(user_command, \
         contact_dictionary, path_file) \
@@ -1145,11 +1150,11 @@ def parser(user_input: str) -> List[str]:
     return it to the list, where the first element is the command, 
     the others are parameters.
 
+        Parameters:
+            user_input (str): String line of user input.
 
-    :incoming: 
-    :user_input -- string from user
-    :return: 
-    :list of comands (list of strings)
+        Returns:
+            list command of user input (list): list of comands (list of strings).
     """
     command_line = user_input.strip().replace(' ','~').lower()
     all_commands = sorted([el.replace('_','~') for el in all_command], key=len)[::-1]   
