@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line ... 15, 47, 644 , 960...! MAP_ALL
+NEXT NEED more TESTS!  + split to modules and... and next function for new field  ! MAP_ALL
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -12,7 +12,7 @@ from typing import List, NoReturn, Union
 AMBUSH = 'AMBUSH!'
 TO_NEXT_FILE_NAME = 'new_one_'
 DEFAULT_FILE_ADDRESS_BOOK = 'ABook.data'
-DISPLAY_LIMIT_RECORDS = 10  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+LIMIT_RECORDS_TO_DISPLAY = 10 
 
 PREFORMATING_PHONE = r'^\+[0-9)(-]{12,16}$'
 PREFORMATING_EMAIL1 = r'\b[a-zA-z][\w_.]+@[a-zA-z]+\.[a-zA-z]{2,}[ ]'
@@ -26,8 +26,8 @@ ERROR_MESSAGE = {
     'PicklingError':['Can\'t save object in file',', my apologies.',],
     'PicklingOthers':['Something was wrong. File',' is not updated. ',],
     'UnknownCommand':['Unknown command ...',],
-    '':['',],
-    '':['',],
+    'UnpredictableError':['Unpredictable error: No contact record available?...',],
+    'UnexpectedError':['Unexpected error!: ',],
     '':['',],
     '':['',],
     '':['',],}
@@ -45,7 +45,7 @@ WARNING_MESSAGE = {
     'empty record to add':'There were no new entries to add.\n',
     'unsuccessful save':'Failed to save file.',
     'name and phone omitted':'Give me name and new phone(s) please.\n',
-    'unknown name':'"The user unknown. No records avaible for this name yet. At first create it.', #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    'unknown name':'"The user is unknown. There are no records for this name yet. Create it first.', 
     'no address book':'No contact records available.\n',
     'name and birthday omitted':'Give me a name and birthday, please.\n',
     'invalid birthday entry':'The year of birth is not correct! A person too old or too young.\n',
@@ -56,17 +56,16 @@ WARNING_MESSAGE = {
     '':'',
     '':'',}
 
-# OTHER_MESSAGE
 OTHER_MESSAGE = {
     'Record': ['\n\nRecord(Name: ', '; Phones: ', '; Birthday: ', ';\n\te-mail: ', ';\n\t details: ', ':\n\t related information: ',],
     'RBirthday':['Birthday already recorded for ','. You can change it.','Birthday not specified for ','. You can add it.',],
-    'RPhone':[' already recorded for ',' already recorded for ',' not specified in the contact ',],
+    'RPhone':[' already recorded for ','Phone(s) entry in record ',' not specified in the contact ',],
     'ABook':['AddressBook(Records:',],
     'next_page':['Press Enter for next Volume... ',],
     'Bye':['Good bye!',],
     'START':['Can I help you?\n',],
     'Unknown':['It is unclear. Unknown command...',],
-    'Hello':['Hello! How can I help you?\n',],
+    'Hello':['Hello! So...\n',],
     'successful addition':['A record(s) have been added.\n',],
     'update successful':['A record have been added. Address book file has been saved.',],
     'no changes':['No changes have been made.\n',],
@@ -74,7 +73,7 @@ OTHER_MESSAGE = {
     'deleting field':['Field record deleted successfully. Results saved.',],
     'no new entries':['There were no entries to add.\n',],
     'found':['Entries found in your contact book:',', birthday: ','(days to next birthday: ','. Will be ',' yrs. old)\n-> phone(s): ',', birthday: unknown\n-> phone(s): ','','',],
-    '':['',],
+    'all list':['Entries in your contact book:',],
     '':['',],
     '':['',],
     '':['',],}
@@ -85,7 +84,7 @@ class AddressBook(UserDict):
     """A class of Address book."""
 
     def __str__(self) -> str:
-        ABOOK0 = OTHER_MESSAGE.get('ABook',[AMBUSH])[0]
+        ABOOK0 = OTHER_MESSAGE.get('ABook', [AMBUSH])[0]
         return f'{ABOOK0}{self.data})'
 
     def add_record(self, record) -> None:  # record: Record
@@ -255,12 +254,12 @@ class Record:
                 self.add_phone(phone)
 
     def __str__(self) -> str:
-        NAME = OTHER_MESSAGE.get('Record',[AMBUSH])[0]
-        PHONES = OTHER_MESSAGE.get('Record',[AMBUSH]*2)[1]
-        BIRTHDAY = OTHER_MESSAGE.get('Record',[AMBUSH]*3)[2]
-        EMAIL = OTHER_MESSAGE.get('Record',[AMBUSH]*4)[3]
-        DETAILS = OTHER_MESSAGE.get('Record',[AMBUSH]*5)[4]
-        RELATED = OTHER_MESSAGE.get('Record',[AMBUSH]*6)[5]
+        NAME = OTHER_MESSAGE.get('Record', [AMBUSH])[0]
+        PHONES = OTHER_MESSAGE.get('Record', [AMBUSH]*2)[1]
+        BIRTHDAY = OTHER_MESSAGE.get('Record', [AMBUSH]*3)[2]
+        EMAIL = OTHER_MESSAGE.get('Record', [AMBUSH]*4)[3]
+        DETAILS = OTHER_MESSAGE.get('Record', [AMBUSH]*5)[4]
+        RELATED = OTHER_MESSAGE.get('Record', [AMBUSH]*6)[5]
 
         return f'{NAME}{self.name}{PHONES}{self.phones}{BIRTHDAY}'\
             f'{self.birthday}{EMAIL}{self.emails}{DETAILS}{self.details}'\
@@ -289,7 +288,7 @@ class Record:
 
             if phone_new1 == phone.value:
                 
-                PHONE0 = OTHER_MESSAGE.get('RPhone',[AMBUSH])[0]
+                PHONE0 = OTHER_MESSAGE.get('RPhone', [AMBUSH])[0]
                 print(f'{phone_new1}{PHONE0}{self.name.value}')
 
                 return False
@@ -322,14 +321,14 @@ class Record:
         for phone in self.phones:
 
             if phone.value == phone_new:  # new number already in record
-                PHONE1 = OTHER_MESSAGE.get('RPhone',[AMBUSH]*2)[1]
-                return False, f'{phone_new}{PHONE1}{self.name.value}'
+                PHONE0 = OTHER_MESSAGE.get('RPhone', [AMBUSH])[0]
+                return False, f'{phone_new}{PHONE0}{self.name.value}'
 
             if phone.value == phone_to_change:  # old number not exist in record
                 verdict = True
 
         if not verdict:
-            PHONE2 = OTHER_MESSAGE.get('RPhone',[AMBUSH]*3)[2]
+            PHONE2 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*3)[2]
             return verdict, f'{phone_to_change}{PHONE2}{self.name.value}'
 
         for index, phone in enumerate(self.phones):
@@ -377,7 +376,7 @@ class Record:
 
                 return True
 
-        PHONE2 = OTHER_MESSAGE.get('RPhone',[AMBUSH]*3)[2]      
+        PHONE2 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*3)[2]      
         print(f'{phone_to_remove}{PHONE2}{self.name.value}')
 
     def years_old(self) -> int:
@@ -387,9 +386,9 @@ class Record:
             user_day = datetime(year=datetime.now().date().year, \
                 month=self.birthday.value.month, day=self.birthday.value.day)
 
-            return datetime.now().year - 1 - self.birthday.value.year \
-                if user_day.date() - datetime.now().date() >= 0 \
-                else datetime.now().year - self.birthday.value.year
+            return datetime.now().year - self.birthday.value.year \
+                if (user_day.date() - datetime.now().date()).days > 0 \
+                else datetime.now().year + 1 - self.birthday.value.year
 
 
 def helper_try_open_file(path_file: str) -> str:
@@ -412,7 +411,7 @@ def helper_try_open_file(path_file: str) -> str:
     return path_file
 
 
-def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
+def helper_try_load_file(path_file: str) -> Union[AddressBook, str]:
     """Create empty address book (AddressBook) if no file on path_file.
     Or, try to load address book database (read) from file. 
     Return loaded address book (AddressBook) and path for address book file.
@@ -436,26 +435,26 @@ def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
                 contact_dictionary = pickle.load(fh)
                 return contact_dictionary, path_file
             except pickle.UnpicklingError:
-                ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingError',[AMBUSH])[0]
-                ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingError',[AMBUSH]*2)[1]
+                ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingError', [AMBUSH])[0]
+                ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingError', [AMBUSH]*2)[1]
                 print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}')
                 contact_dictionary = AddressBook()
 
             except Exception as error_: # pickle.PickleError inherits Exception.
-                ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingOthers',[AMBUSH])[0]
-                ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingOthers',[AMBUSH]*2)[1]
+                ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingOthers', [AMBUSH])[0]
+                ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingOthers', [AMBUSH]*2)[1]
                 print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}\n{repr(error_)}')
                 contact_dictionary = AddressBook()
 
     except OSError as error_:
-        ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile',[AMBUSH])[0]
-        ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile',[AMBUSH]*2)[1]
+        ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile', [AMBUSH])[0]
+        ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile', [AMBUSH]*2)[1]
         print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}\n{type(error_)}: {error_}')
         contact_dictionary = AddressBook()
 
     except Exception as error_:
-        ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile',[AMBUSH])[0]
-        ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile',[AMBUSH]*2)[1]
+        ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile', [AMBUSH])[0]
+        ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile', [AMBUSH]*2)[1]
         print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}\n{repr(error_)}')
         contact_dictionary = AddressBook()
 
@@ -484,28 +483,28 @@ def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> bool:
                 pickle.dump(contact_dictionary, db_file)
 
             except pickle.PicklingError:
-                ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingError',[AMBUSH])[0]
-                ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingError',[AMBUSH]*2)[1]
+                ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingError', [AMBUSH])[0]
+                ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingError', [AMBUSH]*2)[1]
                 print(f'{ERROR_SAVE0}({path_file}){ERROR_SAVE1}')
                 return False
                 # contact_dictionary = AddressBook()
 
             except Exception as error_: # pickle.PickleError inherits Exception.
-                ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingOthers',[AMBUSH])[0]
-                ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingOthers',[AMBUSH]*2)[1]
+                ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingOthers', [AMBUSH])[0]
+                ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingOthers', [AMBUSH]*2)[1]
                 print(f'{ERROR_SAVE0}({path_file}){ERROR_SAVE1}\n{repr(error_)}')
                 return False
                 # contact_dictionary = AddressBook()
 
     except OSError as error_:
-        ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile',[AMBUSH])[0]
-        ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile',[AMBUSH]*2)[1]
+        ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile', [AMBUSH])[0]
+        ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile', [AMBUSH]*2)[1]
         print(f'{ERROR_WRITE0}({path_file}){ERROR_WRITE1}\n{type(error_)}: {error_}')
         return False
 
     except Exception as error_:
-        ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile',[AMBUSH])[0]
-        ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile',[AMBUSH]*2)[1]
+        ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile', [AMBUSH])[0]
+        ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile', [AMBUSH]*2)[1]
         print(f'{ERROR_WRITE0}({path_file}){ERROR_WRITE1}\n{repr(error_)}')
         return False
 
@@ -639,17 +638,18 @@ def input_error(handler):
 
         try:
             result = handler(user_command, contact_dictionary, path_file)
-
+            ERROR_ = ERROR_MESSAGE.get('UnexpectedError', [AMBUSH])[0]
         except KeyError as error:
-            return f"An incorrect name was entered ({error}), not found in the book"
+            return f'{ERROR_}\n{error}\n'
         except ValueError as error:
-            return f"I don't know such commands ({error})"
+            return f'{ERROR_}\n{error}\n'
         except IndexError as error:
-            return f"No values in database ({error})"
+            return f'{ERROR_}\n{error}\n'
         except Exception as error:
-            return f"Something went wrong ({error})"
+            return f'{ERROR_}\n{error}\n'
+
         if result is None:
-            return "No contact record available..."
+            return ERROR_MESSAGE.get('UnpredictableError', [AMBUSH])[0]
 
         return result
 
@@ -676,7 +676,7 @@ def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_f
 
         Parameters:
             user_command (List[str]): List of user command (name of user [and phone(s)]).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
@@ -712,7 +712,7 @@ def handler_add_birthday(user_command: List[str], contact_dictionary: AddressBoo
 
         Parameters:
             user_command (List[str]): List of user command (name of user and birthday).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
@@ -741,7 +741,7 @@ def handler_add_phone(user_command: List[str], contact_dictionary: AddressBook, 
 
         Parameters:
             user_command (List[str]): List of user command (name of user and phone(s)).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
@@ -774,7 +774,7 @@ def handler_change(user_command: List[str], contact_dictionary: AddressBook, pat
 
         Parameters:
             user_command (List[str]): List of user command (name of user and phones).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
@@ -807,7 +807,7 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
 
         Parameters:
             user_command (List[str]): List of user command (name of user, and birthday).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
@@ -828,6 +828,34 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
         no_changes = OTHER_MESSAGE.get('no changes', [AMBUSH])[0]
         return f'{no_changes}{verdict[1]}'
 
+def forming_user_information(record: Record) -> str:
+    """Forming user information from a record and returning it as a string.
+
+        Parameters:
+            record (Record): User record from the address book.
+ 
+        Returns:
+            volume (str): Formed information about the user from record.
+    """
+    volume = ''
+    FOUND_P1 = OTHER_MESSAGE.get('found', [AMBUSH])[1]
+    FOUND_P2 = OTHER_MESSAGE.get('found', [AMBUSH])[2]
+    FOUND_P3 = OTHER_MESSAGE.get('found', [AMBUSH])[3]
+    FOUND_P4 = OTHER_MESSAGE.get('found', [AMBUSH])[4]
+    FOUND_P5 = OTHER_MESSAGE.get('found', [AMBUSH])[5]
+
+    if record.birthday:
+        volume += f'\n\n{record.name}{FOUND_P1}{record.birthday}' \
+        f'{FOUND_P2}{record.days_to_birthday()}'\
+        f'{FOUND_P3}{record.years_old()}{FOUND_P4}'
+
+    else:
+        volume += f'\n\n{record.name}{FOUND_P5}'
+    
+    for phone in record.phones:
+        volume += f'{phone.value}; '
+
+    return volume
 
 @ input_error
 def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=None) -> list:
@@ -836,36 +864,22 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
 
         Parameters:
             user_command (List[str]): List of user command (strimg(s) for searching).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
             found_list (list): Answer for the user - list of string of found users.
     """ 
     found_list = [OTHER_MESSAGE.get('found', [AMBUSH])[0]]
-    FOUND_P1 = OTHER_MESSAGE.get('found', [AMBUSH])[1]
-    FOUND_P2 = OTHER_MESSAGE.get('found', [AMBUSH])[2]
-    FOUND_P3 = OTHER_MESSAGE.get('found', [AMBUSH])[3]
-    FOUND_P4 = OTHER_MESSAGE.get('found', [AMBUSH])[4]
-    FOUND_P5 = OTHER_MESSAGE.get('found', [AMBUSH])[5]
  
-    for records in contact_dictionary.iterator(DISPLAY_LIMIT_RECORDS): 
-        volume = ""
+    for records in contact_dictionary.iterator(LIMIT_RECORDS_TO_DISPLAY): 
+        volume = ''
 
         for record in records:
 
             if find_users(user_command[1:], record):
 
-                if record.birthday:
-                    volume += f'\n\n{record.name}{FOUND_P1}{record.birthday}' \
-                    f'{FOUND_P2}{record.days_to_birthday()}'\
-                    f'{FOUND_P3}{record.years_old()}{FOUND_P4}'
-
-                else:
-                    volume += f'\n\n{record.name}{FOUND_P5}'
-
-                for phone in record.phones:
-                    volume += f'{phone.value}; '
+                volume += forming_user_information(record)
 
         found_list.append(volume)
 
@@ -874,7 +888,7 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
 
 def handler_hello(*_) -> str:
     """Reply to the greeting."""
-    return OTHER_MESSAGE.get('Hello',[AMBUSH])[0]
+    return OTHER_MESSAGE.get('Hello', [AMBUSH])[0]
 
 
 @ input_error
@@ -885,7 +899,7 @@ def handler_phone(user_command: List[str], contact_dictionary: AddressBook, _=No
 
         Parameters:
             user_command (List[str]): List of user command (name of user).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             _: not matter (path_file (str): Is there path and filename of address book).
 
         Returns:
@@ -907,15 +921,17 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
 
         Parameters:
             user_command (List[str]): List of user command (name of user).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
             string(str): Answer for the user.
     """
-    if contact_dictionary.get(user_command[1], None):
+    name = user_command[1]
 
-        contact_dictionary.remove_record(user_command[1])
+    if contact_dictionary.get(name, None):
+
+        contact_dictionary.remove_record(name)
 
         if address_book_saver(contact_dictionary, path_file):
             return OTHER_MESSAGE.get('deleting successful', [AMBUSH])[0]
@@ -923,7 +939,7 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        return f"Record '{user_command[1]}' not found.\n"
+        return WARNING_MESSAGE.get('unknown name', AMBUSH)
 
 
 @ input_error
@@ -956,8 +972,8 @@ def handler_remove_birthday(user_command: List[str], contact_dictionary: Address
             BIRTHDAY3 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*4)[3]
             return f'{BIRTHDAY2}\"{name}\"{BIRTHDAY3}'
 
-    else:
-        return f"Record '{name}' not found.\n"
+    else:  # dublicat 'of except TheContactIsNotExist'
+        return WARNING_MESSAGE.get('unknown name', AMBUSH)
 
 
 @ input_error
@@ -967,19 +983,12 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
     number(s), necessarily with a space.
 
         Parameters:
-            user_command (List[str]): List of user command (name of user [and phone(s)]).
-            contact_dictionary (AddressBook): Instance of AddressBook .
+            user_command (List[str]): List of user command (name of user).
+            contact_dictionary (AddressBook): Instance of AddressBook.
             path_file (str): Is there path and filename of address book.
 
         Returns:
             string(str): Answer for the user.
-
-    :incoming: 
-    :user_command -- list of user command (name of user)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
     """
     name = user_command[1]
     if contact_dictionary.get(name, None):
@@ -997,13 +1006,15 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
                     return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
             else:
-                return f"Phone entry '{phone}' in record '{name}' not found.\n"
+                PHONE2 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*3)[2]
+                return f'\"{phone}\"{PHONE2}\"{name}\".'
 
         else:
-            return f"Phone(s) entry in record '{name}' not found.\n"
+            PHONE1 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*2)[1]
+            return f'\"{PHONE2}\"{name}\".\n'
 
     else:
-        return f"Record '{name}' not found.\n"
+        return WARNING_MESSAGE.get('unknown name', AMBUSH)
 
 
 @ input_error
@@ -1013,32 +1024,15 @@ def handler_show(user_command: List[str], contact_dictionary: AddressBook, _=Non
 
         Parameters:
             user_command (List[str]): List of user command (name of user [and phone(s)]).
-            contact_dictionary (AddressBook): Instance of AddressBook .
-            path_file (str): Is there path and filename of address book.
+            contact_dictionary (AddressBook): Instance of AddressBook.
+            _: not matter (path_file (str): Is there path and filename of address book).
 
         Returns:
-            string(str): Answer for the user.
-
-    :incoming: 
-    :user_command -- list of user command (where user_command[1] is name of user)
-    :contact_dictionary -- instance of AddressBook
-    :return: 
-    :string of information about user
+            string(str): Answer for the user (string of information about user).
     """
     name = user_command[1]
 
-    if contact_dictionary[name].birthday:
-        user_information = f"\n\n{name}, birthday: {contact_dictionary[name].birthday} \
-        ({contact_dictionary[name].days_to_birthday()} days to next birthday. \
-        Will be {contact_dictionary[name].years_old()} years old)\n-> phone(s): "
-
-    else:
-        user_information = f"\n\n{name}, birthday: {contact_dictionary[name].birthday}\n-> phone(s): "
-
-    for phone in contact_dictionary[name].phones:
-        user_information += f"{phone.value}; "
-
-    return user_information
+    return forming_user_information(contact_dictionary[name])
 
 
 @ input_error
@@ -1046,36 +1040,21 @@ def handler_show_all(_, contact_dictionary: AddressBook, _a) -> list:
     """"show all": The bot outputs all saved contacts.
 
         Parameters:
-            user_command (List[str]): List of user command (name of user [and phone(s)]).
-            contact_dictionary (AddressBook): Instance of AddressBook .
-            path_file (str): Is there path and filename of address book.
+            _: not matter (user_command (List[str]): List of user command).
+            contact_dictionary (AddressBook): Instance of AddressBook.
+            _a: not matter (path_file (str): Is there path and filename of address book).
 
         Returns:
-            string(str): Answer for the user.
-
-    :incoming: 
-    :_ -- not_matter: Any
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :list of string of all users
+            string(str): Answer for the user (list of string of all users).
     """
-    all_list = ["Entries in your contact book:"]
+    all_list = [OTHER_MESSAGE.get('all list', [AMBUSH])[0]]
 
     for records in contact_dictionary.iterator(10):  # n_count from?
-        volume = ""
+        volume = ''
 
         for record in records:
 
-            if record.birthday:
-                volume += f"\n\n{record.name}, birthday: {record.birthday} ({record.days_to_birthday()} \
-                days to next birthday. Will be {record.years_old()} years old)\n-> phone(s): "
-
-            else:
-                volume += f"\n\n{record.name}, birthday: {record.birthday}\n-> phone(s): "
-
-            for phone in record.phones:
-                volume += f"{phone.value}; "
+            volume += forming_user_information(record)
 
         all_list.append(volume)
 
@@ -1306,7 +1285,7 @@ def validation_showall(_, contact_dictionary: AddressBook) -> None:
 
 def handler_exit(*_) -> str:
     """Reply to the exit command."""
-    return OTHER_MESSAGE.get('Bye',[AMBUSH])[0]
+    return OTHER_MESSAGE.get('Bye', [AMBUSH])[0]
 
 
 ALL_COMMAND = {'hello': handler_hello,
@@ -1361,7 +1340,7 @@ def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_
     """
     return ALL_COMMAND.get(user_command[0], lambda *args: None)(user_command, \
         contact_dictionary, path_file) \
-        or OTHER_MESSAGE.get('Unknown',[AMBUSH])[0]
+        or OTHER_MESSAGE.get('Unknown', [AMBUSH])[0]
 
 
 def parser(user_input: str) -> List[str]:
@@ -1382,7 +1361,7 @@ def parser(user_input: str) -> List[str]:
             command.replace('~','_')
             return [command.replace('~','_')] + [word for word in user_input[len(command):].split(" ") if word]
 
-    return user_input.strip().split(" ")  #  OTHER_MESSAGE.get('Unknown',[AMBUSH])[0]
+    return user_input.strip().split(" ")  #  OTHER_MESSAGE.get('Unknown', [AMBUSH])[0]
 
 
 def main() -> NoReturn:
@@ -1402,7 +1381,7 @@ def main() -> NoReturn:
     contact_dictionary, new_path_file = helper_try_load_file(new_path_file)
 
     while True:
-        user_command = input(OTHER_MESSAGE.get('START',[AMBUSH])[0])
+        user_command = input(OTHER_MESSAGE.get('START', [AMBUSH])[0])
         user_request = parser(user_command)  # ['remove_phone', '+38000001', '+5555578']
         bot_answer = main_handler(
             user_request, contact_dictionary, new_path_file)
@@ -1417,12 +1396,12 @@ def main() -> NoReturn:
                 if volume:
 
                     print(volume)
-                    input(OTHER_MESSAGE.get('next_page',[AMBUSH])[0])
+                    input(OTHER_MESSAGE.get('next_page', [AMBUSH])[0])
 
         else:
             print(WARNING_MESSAGE.get('main', AMBUSH))
 
-        if bot_answer == OTHER_MESSAGE.get('Bye',[AMBUSH])[0]:
+        if bot_answer == OTHER_MESSAGE.get('Bye', [AMBUSH])[0]:
             break
 
 
