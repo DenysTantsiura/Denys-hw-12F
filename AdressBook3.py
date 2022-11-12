@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line ... 47, 638 ! MAP_ALL
+NEXT line ... 15, 47, 644 , 880...! MAP_ALL
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -12,6 +12,7 @@ from typing import List, NoReturn, Union
 AMBUSH = 'AMBUSH!'
 TO_NEXT_FILE_NAME = 'new_one_'
 DEFAULT_FILE_ADDRESS_BOOK = 'ABook.data'
+DISPLAY_LIMIT_RECORDS = 10  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 PREFORMATING_PHONE = r'^\+[0-9)(-]{12,16}$'
 PREFORMATING_EMAIL1 = r'\b[a-zA-z][\w_.]+@[a-zA-z]+\.[a-zA-z]{2,}[ ]'
@@ -71,8 +72,8 @@ OTHER_MESSAGE = {
     'no changes':['No changes have been made.\n',],
     'deleting successful':['Record successfully deleted. Results saved.',],
     'deleting field':['Field record deleted successfully. Results saved.',],
-    '':['',],
-    '':['',],
+    'no new entries':['There were no entries to add.\n',],
+    'found':['Entries found in your contact book:',', birthday: ','(days to next birthday: ','. Will be ',' yrs. old)\n-> phone(s): ',', birthday: unknown\n-> phone(s): ','','',],
     '':['',],
     '':['',],
     '':['',],
@@ -510,6 +511,7 @@ def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> bool:
 
     return True
 
+
 def find_users(search_strings: List[str], record: Record) -> bool:
     """Check a record for matching the search strings.
 
@@ -658,11 +660,11 @@ def record_update_controller():
     """......."""
     if verdict[0]:
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)
+            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
         return f'{no_changes}{verdict[1]}'
 '''
 
@@ -696,7 +698,7 @@ def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_f
             return WARNING_MESSAGE.get('empty record to add', AMBUSH)
 
     if address_book_saver(contact_dictionary, path_file):
-        return OTHER_MESSAGE.get('successful addition', AMBUSH)
+        return OTHER_MESSAGE.get('successful addition', AMBUSH)[0]
     else:
         return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -708,12 +710,13 @@ def handler_add_birthday(user_command: List[str], contact_dictionary: AddressBoo
     Instead of ... the user enters the name and birthday (in format YYYY-MM-DD), 
     necessarily with a space.
 
-    :incoming: 
-    :user_command -- list of user command (name of user and birthday)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
+        Parameters:
+            user_command (List[str]): List of user command (name of user and birthday).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
     """
     name = user_command[1]
     verdict = contact_dictionary[name].add_birthday(user_command[2])
@@ -721,12 +724,12 @@ def handler_add_birthday(user_command: List[str], contact_dictionary: AddressBoo
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)
+            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
         return f'{no_changes}{verdict[1]}'
 
 
@@ -736,12 +739,13 @@ def handler_add_phone(user_command: List[str], contact_dictionary: AddressBook, 
     and save it in file(path_file). Instead of ... the user enters the name
     and phone number(s), necessarily with a space.
 
-    :incoming: 
-    :user_command -- list of user command (name of user and phone(s))
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
+        Parameters:
+            user_command (List[str]): List of user command (name of user and phone(s)).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
     """
     name = user_command[1]
     phones = user_command[2:]
@@ -752,13 +756,11 @@ def handler_add_phone(user_command: List[str], contact_dictionary: AddressBook, 
         verdict = contact_dictionary[name].add_phone(new_phone) or verdict
         write_count += 1 if verdict else 0
 
-    if write_count == 0:
-        return "There were no new entries to add\n"
-    elif write_count < len(phones):
-        return "There were no new entries to add\n"
+    if not write_count:
+        return OTHER_MESSAGE.get('no new entries', AMBUSH)[0]
 
     if address_book_saver(contact_dictionary, path_file):
-        return OTHER_MESSAGE.get('update successful', AMBUSH)
+        return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
     else:
         return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -770,12 +772,13 @@ def handler_change(user_command: List[str], contact_dictionary: AddressBook, pat
     Instead of ... the user enters the name and phone numbers (current and new), 
     necessarily with a space.
 
-    :incoming: 
-    :user_command -- list of user command (name of user and phones)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
+        Parameters:
+            user_command (List[str]): List of user command (name of user and phones).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
     """
     name = user_command[1]
     current_phone = user_command[2]
@@ -785,12 +788,12 @@ def handler_change(user_command: List[str], contact_dictionary: AddressBook, pat
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)
+            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
         return f'{no_changes}{verdict[1]}'
 
 
@@ -802,12 +805,13 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
     Instead of ... the user enters the name and birthday (in format YYYY-MM-DD), 
     necessarily with a space.
 
-    :incoming: 
-    :user_command -- list of user command (name of user, and birthday)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
+        Parameters:
+            user_command (List[str]): List of user command (name of user, and birthday).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
     """
     name = user_command[1]
     user_birthday = user_command[2]
@@ -816,12 +820,12 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)
+            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
         return f'{no_changes}{verdict[1]}'
 
 
@@ -830,14 +834,22 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
     """"Find ...": The bot outputs a list of users whose name or phone number 
     matches the entered one or more(with an OR setting) string without space(" ").
 
-    :incoming: 
-    :user_command -- list of user command (strimg(s) for searching)
-    :return: 
-    :list of string of found users
-    """
-    found_list = ["Entries found in your contact book:"]
+        Parameters:
+            user_command (List[str]): List of user command (strimg(s) for searching).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
 
-    for records in contact_dictionary.iterator(10):  # 10 is enough
+        Returns:
+            found_list (list): Answer for the user - list of string of found users.
+    """ 
+    found_list = [OTHER_MESSAGE.get('found', AMBUSH)[0]]
+    found_p1 = OTHER_MESSAGE.get('found', AMBUSH)[1]
+    found_p2 = OTHER_MESSAGE.get('found', AMBUSH)[2]
+    found_p3 = OTHER_MESSAGE.get('found', AMBUSH)[3]
+    found_p4 = OTHER_MESSAGE.get('found', AMBUSH)[4]
+    found_p5 = OTHER_MESSAGE.get('found', AMBUSH)[5]
+ 
+    for records in contact_dictionary.iterator(DISPLAY_LIMIT_RECORDS): 
         volume = ""
 
         for record in records:
@@ -845,14 +857,15 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
             if find_users(user_command[1:], record):
 
                 if record.birthday:
-                    volume += f"\n\n{record.name}, birthday: {record.birthday} ({record.days_to_birthday()} \
-                    days to next birthday. Will be {record.years_old()} years old)\n-> phone(s): "
+                    volume += f'\n\n{record.name}{found_p1}{record.birthday}' \
+                    f'{found_p2}{record.days_to_birthday()}'\
+                    f'{found_p3}{record.years_old()}{found_p4}'
 
                 else:
-                    volume += f"\n\n{record.name}, birthday: {record.birthday}\n-> phone(s): "
+                    volume += f'\n\n{record.name}{found_p5}'
 
                 for phone in record.phones:
-                    volume += f"{phone.value}; "
+                    volume += f'{phone.value}; '
 
         found_list.append(volume)
 
@@ -869,6 +882,14 @@ def handler_phone(user_command: List[str], contact_dictionary: AddressBook, _=No
     """"phone ....": The bot outputs the phone number for the specified
     contact. Instead of ... the user enters the name of the contact
     whose number should be displayed.
+
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
 
     :incoming: 
     :user_command -- list of user command (name of user)
@@ -891,6 +912,14 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
     """"remove ...": The bot remove a record contact in contact dictionary 
     and save it in file(path_file). Instead of ... the user enters the name.
 
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
+
     :incoming: 
     :user_command -- list of user command (name of user)
     :contact_dictionary -- instance of AddressBook 
@@ -903,7 +932,7 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
         contact_dictionary.remove_record(user_command[1])
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('deleting successful', AMBUSH)
+            return OTHER_MESSAGE.get('deleting successful', AMBUSH)[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -915,6 +944,14 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
 def handler_remove_birthday(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> str:
     """"remove birthday ...": The bot remove a birthday record from contact in contact dictionary 
     and save it in file(path_file). Instead of ... the user enters the name.
+
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
 
     :incoming: 
     :user_command -- list of user command (name of user)
@@ -931,7 +968,7 @@ def handler_remove_birthday(user_command: List[str], contact_dictionary: Address
             contact_dictionary[name].remove_birthday()
 
             if address_book_saver(contact_dictionary, path_file):
-                return OTHER_MESSAGE.get('deleting field', AMBUSH)
+                return OTHER_MESSAGE.get('deleting field', AMBUSH)[0]
             else:
                 return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -947,6 +984,14 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
     """"remove phone ...": The bot remove a phone record from contact in contact dictionary 
     and save it in file(path_file). Instead of ... the user enters the name and phone 
     number(s), necessarily with a space.
+
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
 
     :incoming: 
     :user_command -- list of user command (name of user)
@@ -966,7 +1011,7 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
             if verdict:
 
                 if address_book_saver(contact_dictionary, path_file):
-                    return OTHER_MESSAGE.get('deleting field', AMBUSH)
+                    return OTHER_MESSAGE.get('deleting field', AMBUSH)[0]
                 else:
                     return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -984,6 +1029,14 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
 def handler_show(user_command: List[str], contact_dictionary: AddressBook, _=None) -> str:
     """"show information about a specific user". With this command, the bot outputs
     birthday, number of days until next birthday and phone numbers to the console.
+
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
 
     :incoming: 
     :user_command -- list of user command (where user_command[1] is name of user)
@@ -1010,6 +1063,14 @@ def handler_show(user_command: List[str], contact_dictionary: AddressBook, _=Non
 @ input_error
 def handler_show_all(_, contact_dictionary: AddressBook, _a) -> list:
     """"show all": The bot outputs all saved contacts.
+
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
 
     :incoming: 
     :_ -- not_matter: Any
