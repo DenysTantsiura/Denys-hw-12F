@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line ... 15, 47, 644 , 880...! MAP_ALL
+NEXT line ... 15, 47, 644 , 960...! MAP_ALL
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -276,8 +276,8 @@ class Record:
             return True,
 
         else:
-            BIRTHDAY0 = OTHER_MESSAGE.get('RBirthday',[AMBUSH])[0]
-            BIRTHDAY1 = OTHER_MESSAGE.get('RBirthday',[AMBUSH]*2)[1]
+            BIRTHDAY0 = OTHER_MESSAGE.get('RBirthday', [AMBUSH])[0]
+            BIRTHDAY1 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*2)[1]
             return False, f'{BIRTHDAY0}{self.name.value}{BIRTHDAY1}'
 
     def add_phone(self, phone_new: str) -> bool:
@@ -302,9 +302,9 @@ class Record:
         """Modify an existing user's birthday entry in the address book."""
         if not self.birthday:
             
-            BIRTHDAY2 = OTHER_MESSAGE.get('RBirthday',[AMBUSH]*3)[2]
-            BIRTHDAY3 = OTHER_MESSAGE.get('RBirthday',[AMBUSH]*4)[3]
-            return False, f'{BIRTHDAY2}{self.name.value}{BIRTHDAY3}'
+            BIRTHDAY2 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*3)[2]
+            BIRTHDAY3 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*4)[3]
+            return False, f'{BIRTHDAY2}\"{self.name.value}\"{BIRTHDAY3}'
 
         else:
 
@@ -660,11 +660,11 @@ def record_update_controller():
     """......."""
     if verdict[0]:
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
+            return OTHER_MESSAGE.get('update successful', [AMBUSH])[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
+        no_changes = OTHER_MESSAGE.get('no changes', [AMBUSH])[0]
         return f'{no_changes}{verdict[1]}'
 '''
 
@@ -698,7 +698,7 @@ def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_f
             return WARNING_MESSAGE.get('empty record to add', AMBUSH)
 
     if address_book_saver(contact_dictionary, path_file):
-        return OTHER_MESSAGE.get('successful addition', AMBUSH)[0]
+        return OTHER_MESSAGE.get('successful addition', [AMBUSH])[0]
     else:
         return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -724,12 +724,12 @@ def handler_add_birthday(user_command: List[str], contact_dictionary: AddressBoo
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
+            return OTHER_MESSAGE.get('update successful', [AMBUSH])[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
+        no_changes = OTHER_MESSAGE.get('no changes', [AMBUSH])[0]
         return f'{no_changes}{verdict[1]}'
 
 
@@ -757,10 +757,10 @@ def handler_add_phone(user_command: List[str], contact_dictionary: AddressBook, 
         write_count += 1 if verdict else 0
 
     if not write_count:
-        return OTHER_MESSAGE.get('no new entries', AMBUSH)[0]
+        return OTHER_MESSAGE.get('no new entries', [AMBUSH])[0]
 
     if address_book_saver(contact_dictionary, path_file):
-        return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
+        return OTHER_MESSAGE.get('update successful', [AMBUSH])[0]
     else:
         return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -788,12 +788,12 @@ def handler_change(user_command: List[str], contact_dictionary: AddressBook, pat
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
+            return OTHER_MESSAGE.get('update successful', [AMBUSH])[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
+        no_changes = OTHER_MESSAGE.get('no changes', [AMBUSH])[0]
         return f'{no_changes}{verdict[1]}'
 
 
@@ -820,12 +820,12 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful', AMBUSH)[0]
+            return OTHER_MESSAGE.get('update successful', [AMBUSH])[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)[0]
+        no_changes = OTHER_MESSAGE.get('no changes', [AMBUSH])[0]
         return f'{no_changes}{verdict[1]}'
 
 
@@ -842,12 +842,12 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
         Returns:
             found_list (list): Answer for the user - list of string of found users.
     """ 
-    found_list = [OTHER_MESSAGE.get('found', AMBUSH)[0]]
-    found_p1 = OTHER_MESSAGE.get('found', AMBUSH)[1]
-    found_p2 = OTHER_MESSAGE.get('found', AMBUSH)[2]
-    found_p3 = OTHER_MESSAGE.get('found', AMBUSH)[3]
-    found_p4 = OTHER_MESSAGE.get('found', AMBUSH)[4]
-    found_p5 = OTHER_MESSAGE.get('found', AMBUSH)[5]
+    found_list = [OTHER_MESSAGE.get('found', [AMBUSH])[0]]
+    FOUND_P1 = OTHER_MESSAGE.get('found', [AMBUSH])[1]
+    FOUND_P2 = OTHER_MESSAGE.get('found', [AMBUSH])[2]
+    FOUND_P3 = OTHER_MESSAGE.get('found', [AMBUSH])[3]
+    FOUND_P4 = OTHER_MESSAGE.get('found', [AMBUSH])[4]
+    FOUND_P5 = OTHER_MESSAGE.get('found', [AMBUSH])[5]
  
     for records in contact_dictionary.iterator(DISPLAY_LIMIT_RECORDS): 
         volume = ""
@@ -857,12 +857,12 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
             if find_users(user_command[1:], record):
 
                 if record.birthday:
-                    volume += f'\n\n{record.name}{found_p1}{record.birthday}' \
-                    f'{found_p2}{record.days_to_birthday()}'\
-                    f'{found_p3}{record.years_old()}{found_p4}'
+                    volume += f'\n\n{record.name}{FOUND_P1}{record.birthday}' \
+                    f'{FOUND_P2}{record.days_to_birthday()}'\
+                    f'{FOUND_P3}{record.years_old()}{FOUND_P4}'
 
                 else:
-                    volume += f'\n\n{record.name}{found_p5}'
+                    volume += f'\n\n{record.name}{FOUND_P5}'
 
                 for phone in record.phones:
                     volume += f'{phone.value}; '
@@ -879,24 +879,17 @@ def handler_hello(*_) -> str:
 
 @ input_error
 def handler_phone(user_command: List[str], contact_dictionary: AddressBook, _=None) -> str:
-    """"phone ....": The bot outputs the phone number for the specified
+    """"phone ...": The bot outputs the phone number for the specified
     contact. Instead of ... the user enters the name of the contact
     whose number should be displayed.
 
         Parameters:
-            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            user_command (List[str]): List of user command (name of user).
             contact_dictionary (AddressBook): Instance of AddressBook .
-            path_file (str): Is there path and filename of address book.
+            _: not matter (path_file (str): Is there path and filename of address book).
 
         Returns:
-            string(str): Answer for the user.
-
-    :incoming: 
-    :user_command -- list of user command (name of user)
-    :contact_dictionary -- instance of AddressBook 
-    :_ -- not_matter: None 
-    :return: 
-    :string -- answer (phone number(s) of user)
+            string(str): Answer for the user (phone number(s) of user).
     """
     phones = ""
     name = user_command[1]
@@ -913,26 +906,19 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
     and save it in file(path_file). Instead of ... the user enters the name.
 
         Parameters:
-            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            user_command (List[str]): List of user command (name of user).
             contact_dictionary (AddressBook): Instance of AddressBook .
             path_file (str): Is there path and filename of address book.
 
         Returns:
             string(str): Answer for the user.
-
-    :incoming: 
-    :user_command -- list of user command (name of user)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
     """
     if contact_dictionary.get(user_command[1], None):
 
         contact_dictionary.remove_record(user_command[1])
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('deleting successful', AMBUSH)[0]
+            return OTHER_MESSAGE.get('deleting successful', [AMBUSH])[0]
         else:
             return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
@@ -946,19 +932,12 @@ def handler_remove_birthday(user_command: List[str], contact_dictionary: Address
     and save it in file(path_file). Instead of ... the user enters the name.
 
         Parameters:
-            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            user_command (List[str]): List of user command (name of user).
             contact_dictionary (AddressBook): Instance of AddressBook .
             path_file (str): Is there path and filename of address book.
 
         Returns:
             string(str): Answer for the user.
-
-    :incoming: 
-    :user_command -- list of user command (name of user)
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
     """
     name = user_command[1]
     if contact_dictionary.get(name, None):
@@ -968,12 +947,14 @@ def handler_remove_birthday(user_command: List[str], contact_dictionary: Address
             contact_dictionary[name].remove_birthday()
 
             if address_book_saver(contact_dictionary, path_file):
-                return OTHER_MESSAGE.get('deleting field', AMBUSH)[0]
+                return OTHER_MESSAGE.get('deleting field', [AMBUSH])[0]
             else:
                 return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
         else:
-            return f"Birthday entry in record '{name}' not found.\n"
+            BIRTHDAY2 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*3)[2]
+            BIRTHDAY3 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*4)[3]
+            return f'{BIRTHDAY2}\"{name}\"{BIRTHDAY3}'
 
     else:
         return f"Record '{name}' not found.\n"
@@ -1011,7 +992,7 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
             if verdict:
 
                 if address_book_saver(contact_dictionary, path_file):
-                    return OTHER_MESSAGE.get('deleting field', AMBUSH)[0]
+                    return OTHER_MESSAGE.get('deleting field', [AMBUSH])[0]
                 else:
                     return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
