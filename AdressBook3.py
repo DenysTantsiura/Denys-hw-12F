@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line ... decorator ! MAP_ALL
+NEXT line ... 47, 638 ! MAP_ALL
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -25,6 +25,10 @@ ERROR_MESSAGE = {
     'PicklingError':['Can\'t save object in file',', my apologies.',],
     'PicklingOthers':['Something was wrong. File',' is not updated. ',],
     'UnknownCommand':['Unknown command ...',],
+    '':['',],
+    '':['',],
+    '':['',],
+    '':['',],
     '':['',],}
 
 WARNING_MESSAGE = {
@@ -39,15 +43,15 @@ WARNING_MESSAGE = {
     'invalid phone':'There are no valid phone numbers.\nThe number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd .\n',
     'empty record to add':'There were no new entries to add.\n',
     'unsuccessful save':'Failed to save file.',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
+    'name and phone omitted':'Give me name and new phone(s) please.\n',
+    'unknown name':'"The user unknown. No records avaible for this name yet. At first create it.', #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    'no address book':'No contact records available.\n',
+    'name and birthday omitted':'Give me a name and birthday, please.\n',
+    'invalid birthday entry':'The year of birth is not correct! A person too old or too young.\n',
+    'invalid birthday':'The calendar date is not possible!\n',
+    'name and 2 phones omitted':'Give me name and 2 phones please (current and new)\n',
+    'no search query':'There is no search query\n',
+    'name is missing':'Give me a name too, please.\n',
     '':'',
     '':'',}
 
@@ -65,6 +69,11 @@ OTHER_MESSAGE = {
     'successful addition':['A record(s) have been added.\n',],
     'update successful':['A record have been added. Address book file has been saved.',],
     'no changes':['No changes have been made.\n',],
+    'deleting successful':['Record successfully deleted. Results saved.',],
+    'deleting field':['Field record deleted successfully. Results saved.',],
+    '':['',],
+    '':['',],
+    '':['',],
     '':['',],
     '':['',],
     '':['',],}
@@ -143,7 +152,7 @@ class Name(Field):
             self._Field__value = new_value
 
         else:
-            print(WARNING_MESSAGE.get('name',AMBUSH))
+            print(WARNING_MESSAGE.get('name', AMBUSH))
 
 
 class Birthday(Field):
@@ -171,7 +180,7 @@ class Phone(Field):
             self._Field__value = self.__preformating(new_value)
 
         else:
-            print(WARNING_MESSAGE.get('phone',AMBUSH))
+            print(WARNING_MESSAGE.get('phone', AMBUSH))
     
     @Field.bloke.setter
     def bloke(self, new_bloke: str):
@@ -209,7 +218,7 @@ class Email(Field):
             self._Field__value = self.new_value.strip()
 
         else:
-            print(WARNING_MESSAGE.get('email',AMBUSH))
+            print(WARNING_MESSAGE.get('email', AMBUSH))
     
     @Field.bloke.setter
     def bloke(self, new_bloke: str):
@@ -539,7 +548,7 @@ def find_users(search_strings: List[str], record: Record) -> bool:
     return False
 
 
-class TheNameIsMissing(Exception):
+class TheNameIsOmitted(Exception):
     pass
 
 class TheContactIsExist(Exception):
@@ -551,17 +560,32 @@ class TheNameIsIncorrect(Exception):
 class ThePhoneIsIncorrect(Exception):
     pass
 
-
-
-
-
-class TheNameIsUnknown(Exception):
+class TheNameAndPhoneAreMissing(Exception):
     pass
 
-class The...(Exception):
+class TheContactIsNotExist(Exception):
     pass
 
+class NoAddressBook(Exception):
+    pass
 
+class TheNameAndBirthdayAreMissing(Exception):
+    pass
+
+class InvalidBirthdayEntry(Exception):
+    pass
+
+class InvalidBirthday(Exception):
+    pass
+
+class TheNameAnd2PhonesAreMissing(Exception):
+    pass
+
+class NoSearchQuery(Exception):
+    pass
+
+class TheNameIsMissing(Exception):
+    pass
 
 
 
@@ -580,25 +604,36 @@ def input_error(handler):
     def exception_function(user_command: list, contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
         """Exception function for handler functions."""
         try:
-            validation_functions[handler.__name__](user_command,\
+            VALIDATION_FUNCTIONS[handler.__name__](user_command,\
                  contact_dictionary)
         except KeyError:
-            return ERROR_MESSAGE.get('UnknownCommand',AMBUSH)
-        except TheNameIsMissing:
-            return WARNING_MESSAGE.get('name is omitted',AMBUSH)
+            return ERROR_MESSAGE.get('UnknownCommand', AMBUSH)
+        except TheNameIsOmitted:
+            return WARNING_MESSAGE.get('name is omitted', AMBUSH)
         except TheContactIsExist:
-            return WARNING_MESSAGE.get('the contact exists',AMBUSH)
+            return WARNING_MESSAGE.get('the contact exists', AMBUSH)
         except TheNameIsIncorrect:
-            return WARNING_MESSAGE.get('invalid name',AMBUSH)
+            return WARNING_MESSAGE.get('invalid name', AMBUSH)
         except ThePhoneIsIncorrect:
-            return WARNING_MESSAGE.get('invalid phone',AMBUSH)
-        except DDDDDDD:
-            return WARNING_MESSAGE.get('name',AMBUSH)
-        except DDDDDDD:
-            return WARNING_MESSAGE.get('name',AMBUSH)
-
-        # if validation:
-        #     return validation
+            return WARNING_MESSAGE.get('invalid phone', AMBUSH)
+        except TheNameAndPhoneAreMissing:
+            return WARNING_MESSAGE.get('name and phone omitted', AMBUSH)
+        except TheContactIsNotExist:
+            return WARNING_MESSAGE.get('unknown name', AMBUSH)
+        except NoAddressBook:
+            return WARNING_MESSAGE.get('no address book', AMBUSH)
+        except TheNameAndBirthdayAreMissing:
+            return WARNING_MESSAGE.get('name and birthday omitted', AMBUSH)
+        except InvalidBirthdayEntry:
+            return WARNING_MESSAGE.get('invalid birthday entry', AMBUSH)
+        except InvalidBirthday:
+            return WARNING_MESSAGE.get('invalid birthday', AMBUSH)
+        except TheNameAnd2PhonesAreMissing:
+            return WARNING_MESSAGE.get('name and 2 phones omitted', AMBUSH)
+        except NoSearchQuery:
+            return WARNING_MESSAGE.get('no search query', AMBUSH)
+        except TheNameIsMissing:
+            return WARNING_MESSAGE.get('name is missing', AMBUSH)
 
         try:
             result = handler(user_command, contact_dictionary, path_file)
@@ -618,6 +653,18 @@ def input_error(handler):
 
     return exception_function
 
+'''
+def record_update_controller():
+    """......."""
+    if verdict[0]:
+        if address_book_saver(contact_dictionary, path_file):
+            return OTHER_MESSAGE.get('update successful', AMBUSH)
+        else:
+            return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
+    else:
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        return f'{no_changes}{verdict[1]}'
+'''
 
 @ input_error
 def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> str:
@@ -646,12 +693,12 @@ def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_f
             verdict = contact_dictionary[name].add_phone(new_phone) or verdict
 
         if not verdict:
-            return WARNING_MESSAGE.get('empty record to add',AMBUSH)
+            return WARNING_MESSAGE.get('empty record to add', AMBUSH)
 
     if address_book_saver(contact_dictionary, path_file):
-        return OTHER_MESSAGE.get('successful addition',AMBUSH)
+        return OTHER_MESSAGE.get('successful addition', AMBUSH)
     else:
-        return WARNING_MESSAGE.get('unsuccessful save',AMBUSH)
+        return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
 
 @ input_error
@@ -674,12 +721,12 @@ def handler_add_birthday(user_command: List[str], contact_dictionary: AddressBoo
     if verdict[0]:
 
         if address_book_saver(contact_dictionary, path_file):
-            return OTHER_MESSAGE.get('update successful',AMBUSH)
+            return OTHER_MESSAGE.get('update successful', AMBUSH)
         else:
-            return WARNING_MESSAGE.get('unsuccessful save',AMBUSH)
+            return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-        no_changes = OTHER_MESSAGE.get('no changes',AMBUSH)
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
         return f'{no_changes}{verdict[1]}'
 
 
@@ -711,9 +758,9 @@ def handler_add_phone(user_command: List[str], contact_dictionary: AddressBook, 
         return "There were no new entries to add\n"
 
     if address_book_saver(contact_dictionary, path_file):
-        return OTHER_MESSAGE.get('update successful',AMBUSH)
+        return OTHER_MESSAGE.get('update successful', AMBUSH)
     else:
-        return WARNING_MESSAGE.get('unsuccessful save',AMBUSH)
+        return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
 
 @ input_error
@@ -737,13 +784,14 @@ def handler_change(user_command: List[str], contact_dictionary: AddressBook, pat
 
     if verdict[0]:
 
-        address_book_saver(contact_dictionary, path_file)
-
-        return "The record has been updated\n"
+        if address_book_saver(contact_dictionary, path_file):
+            return OTHER_MESSAGE.get('update successful', AMBUSH)
+        else:
+            return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-
-        return f"No changes have been made\n{verdict[1]}"
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        return f'{no_changes}{verdict[1]}'
 
 
 @ input_error
@@ -767,13 +815,14 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
 
     if verdict[0]:
 
-        address_book_saver(contact_dictionary, path_file)
-
-        return f"The record {name} has been updated\n"
+        if address_book_saver(contact_dictionary, path_file):
+            return OTHER_MESSAGE.get('update successful', AMBUSH)
+        else:
+            return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
-
-        return f"No changes have been made\n{verdict[1]}"
+        no_changes = OTHER_MESSAGE.get('no changes', AMBUSH)
+        return f'{no_changes}{verdict[1]}'
 
 
 @ input_error
@@ -853,9 +902,10 @@ def handler_remove(user_command: List[str], contact_dictionary: AddressBook, pat
 
         contact_dictionary.remove_record(user_command[1])
 
-        address_book_saver(contact_dictionary, path_file)
-
-        return f"Record '{user_command[1]}' deleted.\n"
+        if address_book_saver(contact_dictionary, path_file):
+            return OTHER_MESSAGE.get('deleting successful', AMBUSH)
+        else:
+            return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
     else:
         return f"Record '{user_command[1]}' not found.\n"
@@ -880,9 +930,10 @@ def handler_remove_birthday(user_command: List[str], contact_dictionary: Address
 
             contact_dictionary[name].remove_birthday()
 
-            address_book_saver(contact_dictionary, path_file)
-
-            return f"Birthday entry from '{name}' deleted.\n"
+            if address_book_saver(contact_dictionary, path_file):
+                return OTHER_MESSAGE.get('deleting field', AMBUSH)
+            else:
+                return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
         else:
             return f"Birthday entry in record '{name}' not found.\n"
@@ -914,9 +965,10 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
 
             if verdict:
 
-                address_book_saver(contact_dictionary, path_file)
-
-                return f"Phone entry '{phone}' from '{name}' deleted.\n"
+                if address_book_saver(contact_dictionary, path_file):
+                    return OTHER_MESSAGE.get('deleting field', AMBUSH)
+                else:
+                    return WARNING_MESSAGE.get('unsuccessful save', AMBUSH)
 
             else:
                 return f"Phone entry '{phone}' in record '{name}' not found.\n"
@@ -987,15 +1039,14 @@ def handler_show_all(_, contact_dictionary: AddressBook, _a) -> list:
 
     return all_list
 
-# def validation_add(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
-#         Union[str, None]:
+
 def validation_add(user_command: list, contact_dictionary: AddressBook) ->\
         None:
     """Check the input parameters. Raise a mismatch exception if found."""
     name = user_command[1] if len(user_command) > 1 else None
 
     if not name:  # len(user_command) < 2:
-        raise TheNameIsMissing
+        raise TheNameIsOmitted
 
     if name in contact_dictionary:
         raise TheContactIsExist
@@ -1005,167 +1056,210 @@ def validation_add(user_command: list, contact_dictionary: AddressBook) ->\
 
     if len(user_command) >= 2:
         phone_count = 0
+
         for phone_candidate in user_command[2:]:
-            phone_count += 1 if re.search(PREFORMATING_PHONE, phone_candidate) else 0
-            if not re.search(PREFORMATING_PHONE, phone_candidate):
-                print(f'{phone_candidate}', WARNING_MESSAGE.get('phone',AMBUSH))
+            phone_matches = re.search(PREFORMATING_PHONE, phone_candidate)
+
+            if phone_matches:
+                phone_count += 1
+
+            else:
+                print(f'{phone_candidate}', WARNING_MESSAGE.get('phone', AMBUSH))
+
         if phone_count < len(user_command[2:]):  # not phone_count:
             raise ThePhoneIsIncorrect
 
 
-def validation_add_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
-        Union[str, None]:
+def validation_add_phone(user_command: list, contact_dictionary: AddressBook) -> None:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
     if len(user_command) < 3:  # or not name:
-        return "Give me name and new phone(s) please\n"
+        raise TheNameAndPhoneAreMissing
 
     if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
+        raise TheNameIsIncorrect
 
     if name not in contact_dictionary:
-        return "You cannot add a phone to a non-existent user. Make a user record first."
+        raise TheContactIsNotExist
+
+    phone_count = 0
 
     for phone_candidate in user_command[2:]:
+        phone_matches = re.search(PREFORMATING_PHONE, phone_candidate)
+        
+        if phone_matches:
+            phone_count += 1
 
-        if not re.search(number_format, phone_candidate):
-            return "The number(s) is invalid.\nThe number must be in the following format with 12 digits(d):\
-             +dd(ddd)ddd-dddd\n"
+        else:
+            print(f'{phone_candidate}', WARNING_MESSAGE.get('phone', AMBUSH))
+
+    if phone_count < len(user_command[2:]):  # not phone_count:
+        raise ThePhoneIsIncorrect
 
 
-# user_command, number_format, name, contact_dictionary
-def validation_birthday(user_command: list, _, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_birthday(user_command: list, contact_dictionary: AddressBook) -> Union[str, None]:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
     if not contact_dictionary:
-        return "No contact records available\n"
+        raise NoAddressBook 
 
     if len(user_command) < 3:  # or not name:
-        return "Give me a name and birthday, please\n"
+        raise TheNameAndBirthdayAreMissing
 
     if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
+        raise TheNameIsIncorrect
 
-    if 1900 > int(user_command[2].split("-")[0]) > datetime.now().year - 16:
-        return "The year of birth is not correct!\n"
+    if datetime.now().year - 122 > int(user_command[2].split("-")[0]) > datetime.now().year - 8:  # 0, 8, 14, 16, 18 ?
+        raise InvalidBirthdayEntry
 
     else:
         try:
             datetime.strptime(user_command[2], "%Y-%m-%d")
 
         except ValueError:
+            raise InvalidBirthday
 
-            return "The calendar date is not possible!\n"
 
-
-def validation_change(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
-        Union[str, None]:
+def validation_change(user_command: list, contact_dictionary: AddressBook) -> \
+        None:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
     if not contact_dictionary:
-        return "No contact records available. You can add records\n"
+        raise NoAddressBook
 
     if len(user_command) < 4:  # or not name:
-        return "Give me name and 2 phones please (current and new)\n"
+        raise TheNameAnd2PhonesAreMissing
 
     if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
+        raise TheNameIsIncorrect
 
-    if not re.search(number_format, user_command[2]):
-        return "The number(s) is invalid: contains invalid characters or incorrect length\n \
-        The number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd\n"
-
-
-def validation_find(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
-    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    if not contact_dictionary:
-        return "No contact records available\n"
-
-    if not name:
-        return "There is no search query\n"
-
-
-# user_command, number_format, name, contact_dictionary
-def validation_phone(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
-    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    if not contact_dictionary:
-        return "No contact records available\n"
-
-    if not name:  # len(user_command) < 2 or not name:
-        return "Give me a name too, please\n"
-
-    if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
-
-
-# user_command, number_format, name, contact_dictionary
-def validation_remove(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
-    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    if not contact_dictionary:
-        return "No contact records available\n"
-
-    if not name:
-        return "Give me a name, please\n"
-
-    if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
-
-    if name not in contact_dictionary:
-        return "You cannot remove a non-existent user."
-
-
-# user_command, number_format, name, contact_dictionary
-def validation_remove_birthday(user_command: list, _, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
-    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    if not contact_dictionary:
-        return "No contact records available\n"
-
-    if len(user_command) < 2:
-        return "Give me a name, please\n"
-
-    if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
-
-    if name not in contact_dictionary:
-        return "You cannot remove birthday entry from a non-existent user."
-
-
-def validation_remove_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
-        Union[str, None]:
-    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    if not contact_dictionary:
-        return "No contact records available\n"
-
-    if not name:
-        return "Give me a name, please\n"
-
-    if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
-
-    if name not in contact_dictionary:
-        return "You cannot remove a phone entry from a non-existent user."
+    phone_count = 0
 
     for phone_candidate in user_command[2:]:
+        phone_matches = re.search(PREFORMATING_PHONE, phone_candidate)
+        
+        if phone_matches:
+            phone_count += 1
 
-        if not re.search(number_format, phone_candidate):
-            return "The number(s) is invalid.\nThe number must be in the following format with 12 digits(d):\
-             +dd(ddd)ddd-dddd\n"
+        else:
+            print(f'{phone_candidate}', WARNING_MESSAGE.get('phone', AMBUSH))
+
+    if phone_count < len(user_command[2:]):  # not phone_count:
+        raise ThePhoneIsIncorrect
 
 
-# user_command, number_format, name, contact_dictionary
-def validation_show(_, _a, name: str, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_find(user_command: list, contact_dictionary: AddressBook) -> None:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
-    if not contact_dictionary:
-        return "No contact records available\n"
+    query = user_command[1] if len(user_command) > 1 else None
 
-    if not name:
-        return "Give me a name, please\n"
+    if not contact_dictionary:
+        raise NoAddressBook
+
+    if not query:
+        raise NoSearchQuery
+
+
+def validation_phone(user_command: list, contact_dictionary: AddressBook) -> None:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
+    if not contact_dictionary:
+        raise NoAddressBook
+
+    if not name:  # len(user_command) < 2 or not name:
+        raise TheNameIsMissing
 
     if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
+        raise TheNameIsIncorrect
 
 
-def validation_showall(_, _a, _b, contact_dictionary: AddressBook) -> Union[str, None]:
+def validation_remove(user_command: list, contact_dictionary: AddressBook) -> None:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
+    if not contact_dictionary:
+        raise NoAddressBook
+
+    if not name:
+        raise TheNameIsMissing
+
+    if name[0].isdigit() or not name[0].isalpha():
+        raise TheNameIsIncorrect
+
+    if name not in contact_dictionary:
+        raise TheContactIsNotExist
+
+
+def validation_remove_birthday(user_command: list, contact_dictionary: AddressBook) -> None:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
+    if not contact_dictionary:
+        raise NoAddressBook
+
+    if not name:  # len(user_command) < 2:
+        raise TheNameIsMissing
+
+    if name[0].isdigit() or not name[0].isalpha():
+        raise TheNameIsIncorrect
+
+    if name not in contact_dictionary:
+        raise TheContactIsNotExist
+
+
+def validation_remove_phone(user_command: list, contact_dictionary: AddressBook) -> \
+        None:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
+    if not contact_dictionary:
+        raise NoAddressBook
+
+    if not name:
+        raise TheNameIsMissing
+
+    if name[0].isdigit() or not name[0].isalpha():
+        raise TheNameIsIncorrect
+
+    if name not in contact_dictionary:
+        raise TheContactIsNotExist
+
+    phone_count = 0
+
+    for phone_candidate in user_command[2:]:
+        phone_matches = re.search(PREFORMATING_PHONE, phone_candidate)
+        
+        if phone_matches:
+            phone_count += 1
+
+        else:
+            print(f'{phone_candidate}', WARNING_MESSAGE.get('phone', AMBUSH))
+
+    if phone_count < 2:  # len(user_command[2:])  # not phone_count:
+        raise ThePhoneIsIncorrect
+
+
+def validation_show(user_command: list, contact_dictionary: AddressBook) -> None:
+    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
+    name = user_command[1] if len(user_command) > 1 else None
+
+    if not contact_dictionary:
+        raise NoAddressBook
+
+    if not name:
+        raise TheNameIsMissing
+
+    if name[0].isdigit() or not name[0].isalpha():
+        raise TheNameIsIncorrect
+
+
+def validation_showall(_, contact_dictionary: AddressBook) -> None:
     """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not contact_dictionary:
-        return "No contact records available\n"
+        raise NoAddressBook
 
 
 def handler_exit(*_) -> str:
@@ -1173,7 +1267,7 @@ def handler_exit(*_) -> str:
     return OTHER_MESSAGE.get('Bye',[AMBUSH])[0]
 
 
-all_command = {'hello': handler_hello,
+ALL_COMMAND = {'hello': handler_hello,
                 'add': handler_add,
                 'add_phone': handler_add_phone,
                 'change': handler_change,
@@ -1191,10 +1285,8 @@ all_command = {'hello': handler_hello,
                 'remove_birthday': handler_remove_birthday, 
                 }
 
-class UnknownCommand(Exception):
-    pass
 
-validation_functions = {
+VALIDATION_FUNCTIONS = {
             "handler_add": validation_add,
             "handler_add_birthday": validation_birthday,
             "handler_add_phone": validation_add_phone,
@@ -1225,7 +1317,7 @@ def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_
             The result of the corresponding function (list): The result of the\
                  certain function is a string or a list of strings.
     """
-    return all_command.get(user_command[0], lambda *args: None)(user_command, \
+    return ALL_COMMAND.get(user_command[0], lambda *args: None)(user_command, \
         contact_dictionary, path_file) \
         or OTHER_MESSAGE.get('Unknown',[AMBUSH])[0]
 
@@ -1242,7 +1334,7 @@ def parser(user_input: str) -> List[str]:
             list command of user input (list): list of comands (list of strings).
     """
     command_line = user_input.strip().replace(' ','~').lower()
-    all_commands = sorted([el.replace('_','~') for el in all_command], key=len)[::-1]   
+    all_commands = sorted([el.replace('_','~') for el in ALL_COMMAND], key=len)[::-1]   
     for command in all_commands:
         if command_line.startswith(command):
             command.replace('~','_')
