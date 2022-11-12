@@ -33,12 +33,12 @@ WARNING_MESSAGE = {
     'phone':'The number is obviously incorrect, the value should start with "+" and have 12 digits.',
     'email':'The e-mail is obviously incorrect.',
     'main':'Something happened. Will you try again?',
-    'name is omitted':'Give me name OR name and phone please\n',
+    'name is omitted':'Give me name OR name and phone please.\n',
     'the contact exists':'Such an entry is already in the book. Add or change a number.',
     'invalid name':'A name cannot begin with a number and can only begin with Latin characters!\n',
-    'invalid phone':'There are no valid phone numbers.\nThe number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd\n',
-    '':'',
-    '':'',
+    'invalid phone':'There are no valid phone numbers.\nThe number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd .\n',
+    'empty record to add':'There were no new entries to add.\n',
+    'unsuccessful save':'Failed to save file.',
     '':'',
     '':'',
     '':'',
@@ -62,9 +62,9 @@ OTHER_MESSAGE = {
     'START':['Can I help you?\n',],
     'Unknown':['It is unclear. Unknown command...',],
     'Hello':['Hello! How can I help you?\n',],
-    '':['',],
-    '':['',],
-    '':['',],
+    'successful addition':['A record(s) have been added.\n',],
+    'update successful':['A record have been added. Address book file has been saved.',],
+    'no changes':['No changes have been made.\n',],
     '':['',],
     '':['',],
     '':['',],}
@@ -417,7 +417,7 @@ def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
     """
     if not os.path.exists(path_file):
         contact_dictionary = AddressBook()
-        address_book_saver(contact_dictionary, path_file)
+        address_book_saver(contact_dictionary, path_file) #  False if can't save file!
         return contact_dictionary, path_file
 
     try:
@@ -455,7 +455,7 @@ def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
     return contact_dictionary, path_file
 
 
-def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> None:
+def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> bool:
     """Save a class AddressBook to a file (path_file).
 
         Parameters:
@@ -463,7 +463,7 @@ def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> None:
             path_file (str): Is there path and filename of address book.
 
         Returns:
-            None.
+            File save success marker (bool).
     """
     try:
 
@@ -477,24 +477,29 @@ def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> None:
                 ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingError',[AMBUSH])[0]
                 ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingError',[AMBUSH]*2)[1]
                 print(f'{ERROR_SAVE0}({path_file}){ERROR_SAVE1}')
-                contact_dictionary = AddressBook()
+                return False
+                # contact_dictionary = AddressBook()
 
             except Exception as error_: # pickle.PickleError inherits Exception.
                 ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingOthers',[AMBUSH])[0]
                 ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingOthers',[AMBUSH]*2)[1]
                 print(f'{ERROR_SAVE0}({path_file}){ERROR_SAVE1}\n{repr(error_)}')
-                contact_dictionary = AddressBook()
+                return False
+                # contact_dictionary = AddressBook()
 
     except OSError as error_:
         ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile',[AMBUSH])[0]
         ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile',[AMBUSH]*2)[1]
         print(f'{ERROR_WRITE0}({path_file}){ERROR_WRITE1}\n{type(error_)}: {error_}')
+        return False
 
     except Exception as error_:
         ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile',[AMBUSH])[0]
         ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile',[AMBUSH]*2)[1]
         print(f'{ERROR_WRITE0}({path_file}){ERROR_WRITE1}\n{repr(error_)}')
+        return False
 
+    return True
 
 def find_users(search_strings: List[str], record: Record) -> bool:
     """Check a record for matching the search strings.
@@ -546,10 +551,14 @@ class TheNameIsIncorrect(Exception):
 class ThePhoneIsIncorrect(Exception):
     pass
 
+
+
+
+
 class TheNameIsUnknown(Exception):
     pass
 
-class TheNameIsIncorrect(Exception):
+class The...(Exception):
     pass
 
 
@@ -616,12 +625,13 @@ def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_f
     and save it in file(path_file). Instead of ... the user enters 
     the name and phone number(s), necessarily with a space.
 
-    :incoming: 
-    :user_command -- list of user command (name of user [and phone(s)])
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str) 
-    :return: 
-    :string -- answer
+        Parameters:
+            user_command (List[str]): List of user command (name of user [and phone(s)]).
+            contact_dictionary (AddressBook): Instance of AddressBook .
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            string(str): Answer for the user.
     """
     name = user_command[1]
     new_record = Record(name)
@@ -636,11 +646,12 @@ def handler_add(user_command: List[str], contact_dictionary: AddressBook, path_f
             verdict = contact_dictionary[name].add_phone(new_phone) or verdict
 
         if not verdict:
-            return "There were no new entries to add\n"
+            return WARNING_MESSAGE.get('empty record to add',AMBUSH)
 
-    address_book_saver(contact_dictionary, path_file)
-
-    return "A record(s) have been added\n"
+    if address_book_saver(contact_dictionary, path_file):
+        return OTHER_MESSAGE.get('successful addition',AMBUSH)
+    else:
+        return WARNING_MESSAGE.get('unsuccessful save',AMBUSH)
 
 
 @ input_error
@@ -662,13 +673,14 @@ def handler_add_birthday(user_command: List[str], contact_dictionary: AddressBoo
 
     if verdict[0]:
 
-        address_book_saver(contact_dictionary, path_file)
-
-        return f"Information about {name} have been updated\n"
+        if address_book_saver(contact_dictionary, path_file):
+            return OTHER_MESSAGE.get('update successful',AMBUSH)
+        else:
+            return WARNING_MESSAGE.get('unsuccessful save',AMBUSH)
 
     else:
-
-        return f"No changes have been made\n{verdict[1]}"
+        no_changes = OTHER_MESSAGE.get('no changes',AMBUSH)
+        return f'{no_changes}{verdict[1]}'
 
 
 @ input_error
@@ -687,16 +699,21 @@ def handler_add_phone(user_command: List[str], contact_dictionary: AddressBook, 
     name = user_command[1]
     phones = user_command[2:]
     verdict = False
+    write_count = 0
 
     for new_phone in phones:
         verdict = contact_dictionary[name].add_phone(new_phone) or verdict
+        write_count += 1 if verdict else 0
 
-    if not verdict:
+    if write_count == 0:
+        return "There were no new entries to add\n"
+    elif write_count < len(phones):
         return "There were no new entries to add\n"
 
-    address_book_saver(contact_dictionary, path_file)
-
-    return "A record have been added\n"
+    if address_book_saver(contact_dictionary, path_file):
+        return OTHER_MESSAGE.get('update successful',AMBUSH)
+    else:
+        return WARNING_MESSAGE.get('unsuccessful save',AMBUSH)
 
 
 @ input_error
@@ -1190,7 +1207,7 @@ validation_functions = {
             "handler_remove_phone": validation_remove_phone,
             "handler_show": validation_show,
             "handler_show_all": validation_showall,
-            "unknown": lambda *_: raise UnknownCommand,  # "Unknown command..."
+            # "unknown": lambda *_: raise UnknownCommand,  # "Unknown command..."
         }
 
 
