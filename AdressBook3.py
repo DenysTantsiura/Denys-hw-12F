@@ -1,5 +1,5 @@
 """ rearch...
-NEXT line "docstrings" main_hendler & parser
+NEXT line ... decorator ! MAP_ALL
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -20,11 +20,11 @@ PREFORMATING_EMAIL2 = r'\b[a-zA-z][\w_.]+@[a-zA-z]+\.[a-zA-z]+\.[a-zA-z]{2,}'
 ERROR_MESSAGE = {
     'UnpicklingError':['The File',' is corrupted, my apologies.',],
     'UnpicklingOthers':['Is the File',' corrupted? ',],
-    'OpenFile':['No access to File',', error: ',],
-    '':['',],
-    '':['',],
-    '':['',],
-    '':['',],
+    'OpenFile':['No access to File',', system error: ',],
+    'WriteFile':['No access to write File',', error: ',],
+    'PicklingError':['Can\'t save object in file',', my apologies.',],
+    'PicklingOthers':['Something was wrong. File',' is not updated. ',],
+    'UnknownCommand':['Unknown command ...',],
     '':['',],}
 
 WARNING_MESSAGE = {
@@ -33,10 +33,10 @@ WARNING_MESSAGE = {
     'phone':'The number is obviously incorrect, the value should start with "+" and have 12 digits.',
     'email':'The e-mail is obviously incorrect.',
     'main':'Something happened. Will you try again?',
-    '':'',
-    '':'',
-    '':'',
-    '':'',
+    'name is omitted':'Give me name OR name and phone please\n',
+    'the contact exists':'Such an entry is already in the book. Add or change a number.',
+    'invalid name':'A name cannot begin with a number and can only begin with Latin characters!\n',
+    'invalid phone':'There are no valid phone numbers.\nThe number must be in the following format with 12 digits(d): +dd(ddd)ddd-dddd\n',
     '':'',
     '':'',
     '':'',
@@ -61,7 +61,7 @@ OTHER_MESSAGE = {
     'Bye':['Good bye!',],
     'START':['Can I help you?\n',],
     'Unknown':['It is unclear. Unknown command...',],
-    '':['',],
+    'Hello':['Hello! How can I help you?\n',],
     '':['',],
     '':['',],
     '':['',],
@@ -412,8 +412,8 @@ def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
 
         Returns:
             contact_dictionary (AddressBook): Loaded from file or new empty class.
-            path_file (str): Name of file for save address book in future steps.
-                Unoccupied name of file, if apeared exeption. # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+            path_file (str): The file name to save the address book in the following steps..
+                Unoccupied name of file, if an exception occurred.
     """
     if not os.path.exists(path_file):
         contact_dictionary = AddressBook()
@@ -431,16 +431,22 @@ def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
                 print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}')
                 contact_dictionary = AddressBook()
 
-            except Exception as error_:
+            except Exception as error_: # pickle.PickleError inherits Exception.
                 ERROR_LOAD0 = ERROR_MESSAGE.get('UnpicklingOthers',[AMBUSH])[0]
                 ERROR_LOAD1 = ERROR_MESSAGE.get('UnpicklingOthers',[AMBUSH]*2)[1]
-                print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}{repr(error_)}')
+                print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}\n{repr(error_)}')
                 contact_dictionary = AddressBook()
 
-    except Exception as error_:  # !!!!!!! No access for reading ?????????????????????????????
+    except OSError as error_:
         ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile',[AMBUSH])[0]
         ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile',[AMBUSH]*2)[1]
-        print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}{repr(error_)}')
+        print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}\n{type(error_)}: {error_}')
+        contact_dictionary = AddressBook()
+
+    except Exception as error_:
+        ERROR_LOAD0 = ERROR_MESSAGE.get('OpenFile',[AMBUSH])[0]
+        ERROR_LOAD1 = ERROR_MESSAGE.get('OpenFile',[AMBUSH]*2)[1]
+        print(f'{ERROR_LOAD0}({path_file}){ERROR_LOAD1}\n{repr(error_)}')
         contact_dictionary = AddressBook()
 
     while os.path.exists(path_file):
@@ -449,29 +455,56 @@ def helper_try_load_file(path_file: str) -> tuple(str, AddressBook):
     return contact_dictionary, path_file
 
 
-
-# --------------------------------------------------------------------------------
-
-
 def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> None:
-    """Save a class AddressBook to a file
+    """Save a class AddressBook to a file (path_file).
 
-    :incoming: 
-    :contact_dictionary -- instance of AddressBook 
-    :path_file -- is there path and filename of address book (in str)
-    :return: None
+        Parameters:
+            contact_dictionary (AddressBook): Instance of AddressBook.
+            path_file (str): Is there path and filename of address book.
+
+        Returns:
+            None.
     """
-    with open(path_file, "wb") as db_file:
-        pickle.dump(contact_dictionary, db_file)
+    try:
+
+        with open(path_file, "wb") as db_file:
+
+            try:
+
+                pickle.dump(contact_dictionary, db_file)
+
+            except pickle.PicklingError:
+                ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingError',[AMBUSH])[0]
+                ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingError',[AMBUSH]*2)[1]
+                print(f'{ERROR_SAVE0}({path_file}){ERROR_SAVE1}')
+                contact_dictionary = AddressBook()
+
+            except Exception as error_: # pickle.PickleError inherits Exception.
+                ERROR_SAVE0 = ERROR_MESSAGE.get('PicklingOthers',[AMBUSH])[0]
+                ERROR_SAVE1 = ERROR_MESSAGE.get('PicklingOthers',[AMBUSH]*2)[1]
+                print(f'{ERROR_SAVE0}({path_file}){ERROR_SAVE1}\n{repr(error_)}')
+                contact_dictionary = AddressBook()
+
+    except OSError as error_:
+        ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile',[AMBUSH])[0]
+        ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile',[AMBUSH]*2)[1]
+        print(f'{ERROR_WRITE0}({path_file}){ERROR_WRITE1}\n{type(error_)}: {error_}')
+
+    except Exception as error_:
+        ERROR_WRITE0 = ERROR_MESSAGE.get('WriteFile',[AMBUSH])[0]
+        ERROR_WRITE1 = ERROR_MESSAGE.get('WriteFile',[AMBUSH]*2)[1]
+        print(f'{ERROR_WRITE0}({path_file}){ERROR_WRITE1}\n{repr(error_)}')
 
 
 def find_users(search_strings: List[str], record: Record) -> bool:
     """Check a record for matching the search strings.
 
-    :incoming: 
-    :search_strings (list) strimg(s) for searching
-    :return: 
-    :True or False, as a result of the search
+        Parameters:
+            search_strings (List[str]): The data in the list rows in the user's search query.
+            record (Record): Record - User account card.
+
+        Returns:
+            True or False (bool): Search result (Search success rate).
     """
     name = f"{record.name}"
 
@@ -501,62 +534,74 @@ def find_users(search_strings: List[str], record: Record) -> bool:
     return False
 
 
+class TheNameIsMissing(Exception):
+    pass
+
+class TheContactIsExist(Exception):
+    pass
+
+class TheNameIsIncorrect(Exception):
+    pass
+
+class ThePhoneIsIncorrect(Exception):
+    pass
+
+class TheNameIsUnknown(Exception):
+    pass
+
+class TheNameIsIncorrect(Exception):
+    pass
+
+
+
+
+
+# --------------------------------------------------------------------------------
 
 def input_error(handler):
     """User error handler (decorator).
 
-    :incoming: 
-    :handler -- incoming function
-    :return: 
-    :str or list -- result(str or list) or str from exception_function(handler(...))
+        Parameters:
+            handler (function): Incoming function.
+
+        Returns:
+            exception_function(function): Exception function for handler functions.
+
     """
     def exception_function(user_command: list, contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
-        """decorator"""
-        number_format = r"^\+[0-9)(-]{12,16}$"
+        """Exception function for handler functions."""
+        try:
+            validation_functions[handler.__name__](user_command,\
+                 contact_dictionary)
+        except KeyError:
+            return ERROR_MESSAGE.get('UnknownCommand',AMBUSH)
+        except TheNameIsMissing:
+            return WARNING_MESSAGE.get('name is omitted',AMBUSH)
+        except TheContactIsExist:
+            return WARNING_MESSAGE.get('the contact exists',AMBUSH)
+        except TheNameIsIncorrect:
+            return WARNING_MESSAGE.get('invalid name',AMBUSH)
+        except ThePhoneIsIncorrect:
+            return WARNING_MESSAGE.get('invalid phone',AMBUSH)
+        except DDDDDDD:
+            return WARNING_MESSAGE.get('name',AMBUSH)
+        except DDDDDDD:
+            return WARNING_MESSAGE.get('name',AMBUSH)
 
-        if len(user_command) > 1:
-            name = user_command[1]
-
-        else:
-            name = None
-
-        validation_functions = {
-            "handler_add": validation_add,
-            "handler_add_birthday": validation_birthday,
-            "handler_add_phone": validation_add_phone,
-            "handler_change": validation_change,
-            "handler_change_birthday": validation_birthday,
-            "handler_find": validation_find,
-            "handler_phone": validation_phone,
-            "handler_remove": validation_remove,
-            "handler_remove_birthday": validation_remove_birthday,
-            "handler_remove_phone": validation_remove_phone,
-            "handler_show": validation_show,
-            "handler_show_all": validation_showall,
-            "unknown": lambda *_: "Unknown command...",
-        }
-        # validation = validation_functions[handler.__name__](user_command, number_format, name, contact_dictionary)
-        validation = validation_functions.get(handler.__name__, validation_functions["unknown"])(
-            user_command, number_format, name, contact_dictionary)
-
-        if validation:
-            return validation
+        # if validation:
+        #     return validation
 
         try:
             result = handler(user_command, contact_dictionary, path_file)
 
         except KeyError as error:
             return f"An incorrect name was entered ({error}), not found in the book"
-
         except ValueError as error:
             return f"I don't know such commands ({error})"
-
         except IndexError as error:
             return f"No values in database ({error})"
-
         except Exception as error:
             return f"Something went wrong ({error})"
-
         if result is None:
             return "No contact record available..."
 
@@ -750,7 +795,7 @@ def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=Non
 
 def handler_hello(*_) -> str:
     """Reply to the greeting."""
-    return "How can I help you?\n"
+    return OTHER_MESSAGE.get('Hello',[AMBUSH])[0]
 
 
 @ input_error
@@ -925,26 +970,30 @@ def handler_show_all(_, contact_dictionary: AddressBook, _a) -> list:
 
     return all_list
 
+# def validation_add(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
+#         Union[str, None]:
+def validation_add(user_command: list, contact_dictionary: AddressBook) ->\
+        None:
+    """Check the input parameters. Raise a mismatch exception if found."""
+    name = user_command[1] if len(user_command) > 1 else None
 
-def validation_add(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
-        Union[str, None]:
-    """Check the input parameters. Return a message (str) about a discrepancy if it is detected."""
     if not name:  # len(user_command) < 2:
-        return "Give me name OR name and phone please\n"
+        raise TheNameIsMissing
 
     if name in contact_dictionary:
-        return "Such an entry is already in the book. Add or change a number."
+        raise TheContactIsExist
 
     if name[0].isdigit() or not name[0].isalpha():
-        return "A name cannot begin with a number and can only begin with Latin characters!\n"
+        raise TheNameIsIncorrect
 
     if len(user_command) >= 2:
-
+        phone_count = 0
         for phone_candidate in user_command[2:]:
-
-            if not re.search(number_format, phone_candidate):
-                return "The number(s) is invalid.\nThe number must be in the following format with 12 digits(d): \
-                +dd(ddd)ddd-dddd\n"
+            phone_count += 1 if re.search(PREFORMATING_PHONE, phone_candidate) else 0
+            if not re.search(PREFORMATING_PHONE, phone_candidate):
+                print(f'{phone_candidate}', WARNING_MESSAGE.get('phone',AMBUSH))
+        if phone_count < len(user_command[2:]):  # not phone_count:
+            raise ThePhoneIsIncorrect
 
 
 def validation_add_phone(user_command: list, number_format: str, name: str, contact_dictionary: AddressBook) -> \
@@ -1104,26 +1153,45 @@ def validation_showall(_, _a, _b, contact_dictionary: AddressBook) -> Union[str,
 
 def handler_exit(*_) -> str:
     """Reply to the exit command."""
-    return "Good bye!"
+    return OTHER_MESSAGE.get('Bye',[AMBUSH])[0]
 
 
-all_command = {"hello": handler_hello,
-                "add": handler_add,
-                "add_phone": handler_add_phone,
-                "change": handler_change,
-                "phone": handler_phone,
-                "show_all": handler_show_all,
-                "good_bye": handler_exit,
-                "close": handler_exit,
-                "exit": handler_exit,
-                "show": handler_show,
-                "add_birthday": handler_add_birthday,
-                "change_birthday": handler_change_birthday,
-                "find": handler_find,
-                "remove": handler_remove,
-                "remove_phone": handler_remove_phone,
-                "remove_birthday": handler_remove_birthday, 
+all_command = {'hello': handler_hello,
+                'add': handler_add,
+                'add_phone': handler_add_phone,
+                'change': handler_change,
+                'phone': handler_phone,
+                'show_all': handler_show_all,
+                'good_bye': handler_exit,
+                'close': handler_exit,
+                'exit': handler_exit,
+                'show': handler_show,
+                'add_birthday': handler_add_birthday,
+                'change_birthday': handler_change_birthday,
+                'find': handler_find,
+                'remove': handler_remove,
+                'remove_phone': handler_remove_phone,
+                'remove_birthday': handler_remove_birthday, 
                 }
+
+class UnknownCommand(Exception):
+    pass
+
+validation_functions = {
+            "handler_add": validation_add,
+            "handler_add_birthday": validation_birthday,
+            "handler_add_phone": validation_add_phone,
+            "handler_change": validation_change,
+            "handler_change_birthday": validation_birthday,
+            "handler_find": validation_find,
+            "handler_phone": validation_phone,
+            "handler_remove": validation_remove,
+            "handler_remove_birthday": validation_remove_birthday,
+            "handler_remove_phone": validation_remove_phone,
+            "handler_show": validation_show,
+            "handler_show_all": validation_showall,
+            "unknown": lambda *_: raise UnknownCommand,  # "Unknown command..."
+        }
 
 
 def main_handler(user_command: List[str], contact_dictionary: AddressBook, path_file: str) -> Union[str, list]:
