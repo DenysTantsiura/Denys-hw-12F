@@ -35,7 +35,7 @@ ERROR_MESSAGE = {
 WARNING_MESSAGE = {
     'name':'At the beginning there can be only a Latin letter!',
     'birthday':'Incorrect or nonexistent date, entry must be in year-month-day format (YYYY-MM-DD).',
-    'phone':'The number is obviously incorrect, the value should start with "+" and have 12 digits.',
+    'phone':'The number is obviously incorrect, the value should start with \"+\" and have 12 digits.',
     'email':'The e-mail is obviously incorrect.',
     'main':'Something happened. Will you try again?',
     'name is omitted':'Give me name OR name and phone please.\n',
@@ -45,7 +45,7 @@ WARNING_MESSAGE = {
     'empty record to add':'There were no new entries to add.\n',
     'unsuccessful save':'Failed to save file.',
     'name and phone omitted':'Give me name and new phone(s) please.\n',
-    'unknown name':'"The user is unknown. There are no records for this name yet. Create it first.', 
+    'unknown name':'The user is unknown. There are no records for this name yet. Create it first.', 
     'no address book':'No contact records available.\n',
     'name and birthday omitted':'Give me a name and birthday, please.\n',
     'invalid birthday entry':'The year of birth is not correct! A person too old or too young.\n',
@@ -59,7 +59,7 @@ WARNING_MESSAGE = {
 OTHER_MESSAGE = {
     'Record': ['\n\nRecord(Name: ', '; Phones: ', '; Birthday: ', ';\n\te-mail: ', ';\n\t details: ', ':\n\t related information: ',],
     'RBirthday':['Birthday already recorded for ','. You can change it.','Birthday not specified for ','. You can add it.',],
-    'RPhone':[' already recorded for ','Phone(s) entry in record ',' not specified in the contact ',],
+    'RPhone':[' already recorded for ','No phone(s) entry in record ',' not specified in the contact ',],
     'ABook':['AddressBook(Records:',],
     'next_page':['Press Enter for next Volume... ',],
     'Bye':['Good bye!',],
@@ -124,7 +124,7 @@ class Field:  # superclass for all base fields
         self.__bloke = None
 
     def __str__(self):
-        return f"{self.value}"
+        return f'{self.value}'
 
     @property
     def value(self):
@@ -159,7 +159,7 @@ class Birthday(Field):
     """Class of Birthday data."""
     @Field.value.setter
     def value(self, new_value: str):
-        birthday_data = datetime.strptime(new_value, "%Y-%m-%d")
+        birthday_data = datetime.strptime(new_value, '%Y-%m-%d')
 
         if birthday_data:
             self._Field__value = birthday_data
@@ -168,7 +168,7 @@ class Birthday(Field):
             print(WARNING_MESSAGE.get('birthday', AMBUSH))
 
     def __str__(self) -> str:
-        return f"{self.value.date()}"
+        return f'{self.value.date()}'
 
 
 class Phone(Field):
@@ -191,8 +191,8 @@ class Phone(Field):
         """Preformating of phone string into the form +dd(ddd)ddddddd."""
         value = value.replace('-', '').replace('(', '').replace(')', '')
 
-        value = "(".join((value[: 3], value[3:]))
-        value = ")".join((value[: 7], value[7:]))
+        value = '('.join((value[: 3], value[3:]))
+        value = ')'.join((value[: 7], value[7:]))
  
         return value
 
@@ -277,7 +277,7 @@ class Record:
         else:
             BIRTHDAY0 = OTHER_MESSAGE.get('RBirthday', [AMBUSH])[0]
             BIRTHDAY1 = OTHER_MESSAGE.get('RBirthday', [AMBUSH]*2)[1]
-            return False, f'{BIRTHDAY0}{self.name.value}{BIRTHDAY1}'
+            return False, f'{BIRTHDAY0}\"{self.name.value}\"{BIRTHDAY1}'
 
     def add_phone(self, phone_new: str) -> bool:
         """Adds a new entry for the user's phone to the address book."""
@@ -289,7 +289,7 @@ class Record:
             if phone_new1 == phone.value:
                 
                 PHONE0 = OTHER_MESSAGE.get('RPhone', [AMBUSH])[0]
-                print(f'{phone_new1}{PHONE0}{self.name.value}')
+                print(f'\"{phone_new1}\"{PHONE0}\"{self.name.value}\"')
 
                 return False
 
@@ -322,14 +322,14 @@ class Record:
 
             if phone.value == phone_new:  # new number already in record
                 PHONE0 = OTHER_MESSAGE.get('RPhone', [AMBUSH])[0]
-                return False, f'{phone_new}{PHONE0}{self.name.value}'
+                return False, f'\"{phone_new}\"{PHONE0}\"{self.name.value}\"'
 
             if phone.value == phone_to_change:  # old number not exist in record
                 verdict = True
 
         if not verdict:
             PHONE2 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*3)[2]
-            return verdict, f'{phone_to_change}{PHONE2}{self.name.value}'
+            return verdict, f'\"{phone_to_change}\"{PHONE2}\"{self.name.value}\"'
 
         for index, phone in enumerate(self.phones):
 
@@ -377,7 +377,7 @@ class Record:
                 return True
 
         PHONE2 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*3)[2]      
-        print(f'{phone_to_remove}{PHONE2}{self.name.value}')
+        print(f'\"{phone_to_remove}\"{PHONE2}\"{self.name.value}\"')
 
     def years_old(self) -> int:
         """Calculate the number of full years of the user on the next birthday."""
@@ -430,7 +430,7 @@ def helper_try_load_file(path_file: str) -> Union[AddressBook, str]:
         return contact_dictionary, path_file
 
     try:
-        with open(path_file, "rb") as fh:
+        with open(path_file, 'rb') as fh:
             try:
                 contact_dictionary = pickle.load(fh)
                 return contact_dictionary, path_file
@@ -476,7 +476,7 @@ def address_book_saver(contact_dictionary: AddressBook, path_file: str) -> bool:
     """
     try:
 
-        with open(path_file, "wb") as db_file:
+        with open(path_file, 'wb') as db_file:
 
             try:
 
@@ -521,7 +521,7 @@ def find_users(search_strings: List[str], record: Record) -> bool:
         Returns:
             True or False (bool): Search result (Search success rate).
     """
-    name = f"{record.name}"
+    name = f'{record.name}'
 
     for search_string in search_strings:
 
@@ -531,7 +531,7 @@ def find_users(search_strings: List[str], record: Record) -> bool:
 
         if record.birthday:
 
-            birthday = f"{record.birthday}"
+            birthday = f'{record.birthday}'
 
             if birthday.find(search_string) >= 0:
 
@@ -540,9 +540,9 @@ def find_users(search_strings: List[str], record: Record) -> bool:
         for phone in record.phones:
             candidate = f"{phone.value}"
             candidate = candidate.replace(
-                "-", "").replace("+", "").replace("(", "").replace(")", "")
+                '-', '').replace('+', '').replace('(', '').replace(')', '')
 
-            if candidate.find(search_string.replace("-", "").replace("+", "").replace("(", "").replace(")", "")) >= 0:
+            if candidate.find(search_string.replace('-', '').replace('+', '').replace('(', '').replace(')', '')) >= 0:
 
                 return True
 
@@ -588,9 +588,6 @@ class NoSearchQuery(Exception):
 class TheNameIsMissing(Exception):
     pass
 
-
-
-# --------------------------------------------------------------------------------
 
 def input_error(handler):
     """User error handler (decorator).
@@ -828,6 +825,7 @@ def handler_change_birthday(user_command: List[str], contact_dictionary: Address
         no_changes = OTHER_MESSAGE.get('no changes', [AMBUSH])[0]
         return f'{no_changes}{verdict[1]}'
 
+
 def forming_user_information(record: Record) -> str:
     """Forming user information from a record and returning it as a string.
 
@@ -857,10 +855,11 @@ def forming_user_information(record: Record) -> str:
 
     return volume
 
+
 @ input_error
 def handler_find(user_command: List[str], contact_dictionary: AddressBook, _=None) -> list:
     """"Find ...": The bot outputs a list of users whose name or phone number 
-    matches the entered one or more(with an OR setting) string without space(" ").
+    matches the entered one or more(with an OR setting) string without space(' ').
 
         Parameters:
             user_command (List[str]): List of user command (strimg(s) for searching).
@@ -905,11 +904,11 @@ def handler_phone(user_command: List[str], contact_dictionary: AddressBook, _=No
         Returns:
             string(str): Answer for the user (phone number(s) of user).
     """
-    phones = ""
+    phones = ''
     name = user_command[1]
 
     for phone in (contact_dictionary[name]).phones:
-        phones += f"{phone.value}; "
+        phones += f'{phone.value}; '
 
     return phones
 
@@ -1011,7 +1010,7 @@ def handler_remove_phone(user_command: List[str], contact_dictionary: AddressBoo
 
         else:
             PHONE1 = OTHER_MESSAGE.get('RPhone', [AMBUSH]*2)[1]
-            return f'\"{PHONE2}\"{name}\".\n'
+            return f'{PHONE1}\"{name}\".\n'
 
     else:
         return WARNING_MESSAGE.get('unknown name', AMBUSH)
@@ -1132,12 +1131,12 @@ def validation_birthday(user_command: list, contact_dictionary: AddressBook) -> 
     if name[0].isdigit() or not name[0].isalpha():
         raise TheNameIsIncorrect
 
-    if datetime.now().year - 122 > int(user_command[2].split("-")[0]) > datetime.now().year - 8:  # 0, 8, 14, 16, 18 ?
+    if datetime.now().year - 122 > int(user_command[2].split('-')[0]) > datetime.now().year - 8:  # 0, 8, 14, 16, 18 ?
         raise InvalidBirthdayEntry
 
     else:
         try:
-            datetime.strptime(user_command[2], "%Y-%m-%d")
+            datetime.strptime(user_command[2], '%Y-%m-%d')
 
         except ValueError:
             raise InvalidBirthday
@@ -1308,19 +1307,19 @@ ALL_COMMAND = {'hello': handler_hello,
 
 
 VALIDATION_FUNCTIONS = {
-            "handler_add": validation_add,
-            "handler_add_birthday": validation_birthday,
-            "handler_add_phone": validation_add_phone,
-            "handler_change": validation_change,
-            "handler_change_birthday": validation_birthday,
-            "handler_find": validation_find,
-            "handler_phone": validation_phone,
-            "handler_remove": validation_remove,
-            "handler_remove_birthday": validation_remove_birthday,
-            "handler_remove_phone": validation_remove_phone,
-            "handler_show": validation_show,
-            "handler_show_all": validation_showall,
-            # "unknown": lambda *_: raise UnknownCommand,  # "Unknown command..."
+            'handler_add': validation_add,
+            'handler_add_birthday': validation_birthday,
+            'handler_add_phone': validation_add_phone,
+            'handler_change': validation_change,
+            'handler_change_birthday': validation_birthday,
+            'handler_find': validation_find,
+            'handler_phone': validation_phone,
+            'handler_remove': validation_remove,
+            'handler_remove_birthday': validation_remove_birthday,
+            'handler_remove_phone': validation_remove_phone,
+            'handler_show': validation_show,
+            'handler_show_all': validation_showall,
+            # 'unknown': lambda *_: raise UnknownCommand,  # 'Unknown command...'
         }
 
 
@@ -1359,9 +1358,9 @@ def parser(user_input: str) -> List[str]:
     for command in all_commands:
         if command_line.startswith(command):
             command.replace('~','_')
-            return [command.replace('~','_')] + [word for word in user_input[len(command):].split(" ") if word]
+            return [command.replace('~','_')] + [word for word in user_input[len(command):].split(' ') if word]
 
-    return user_input.strip().split(" ")  #  OTHER_MESSAGE.get('Unknown', [AMBUSH])[0]
+    return user_input.strip().split(' ')  #  OTHER_MESSAGE.get('Unknown', [AMBUSH])[0]
 
 
 def main() -> NoReturn:
