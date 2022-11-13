@@ -1,5 +1,20 @@
 """ rearch...
 NEXT NEED more TESTS!  + split to modules and... and next function for new field  ! MAP_ALL
+lines 91, 1307, 
+
+-help for each command (from docstrings?)
+-split to modules
+-add e-mail commands
+-add block in phone and mail commands
+-add detail and related... commands
+-Cweb2 + video
+-описати абстрактний базовий клас для представлень користувача і конкретні реалізації, які наслідують базовий клас і реалізують консольний інтерфейс.
+
+
+
+
+
+
 """
 from collections import UserDict
 from datetime import datetime, timedelta
@@ -74,7 +89,7 @@ OTHER_MESSAGE = {
     'no new entries':['There were no entries to add.\n',],
     'found':['Entries found in your contact book:',', birthday: ','(days to next birthday: ','. Will be ',' yrs. old)\n-> phone(s): ',', birthday: unknown\n-> phone(s): ','','',],
     'all list':['Entries in your contact book:',],
-    '':['',],
+    'all commands list':['All commands in current version Personal Virtual Assistant:\n', 'Detailed for each command: \"-h\" after them.\n'],  #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     '':['',],
     '':['',],}
 
@@ -1287,6 +1302,15 @@ def handler_exit(*_) -> str:
     return OTHER_MESSAGE.get('Bye', [AMBUSH])[0]
 
 
+def handler_help(*_):
+    """
+    Print all commands and examples.  # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    """
+    all_commands_list = [OTHER_MESSAGE.get('all commands list', [AMBUSH])[0]]
+    all_commands_list += [f'''{key.replace('_',' ')}\n''' for key in ALL_COMMAND]
+    return ''.join(all_commands_list)
+
+
 ALL_COMMAND = {'hello': handler_hello,
                 'add': handler_add,
                 'add_phone': handler_add_phone,
@@ -1303,6 +1327,8 @@ ALL_COMMAND = {'hello': handler_hello,
                 'remove': handler_remove,
                 'remove_phone': handler_remove_phone,
                 'remove_birthday': handler_remove_birthday, 
+                'help': handler_help,
+                '?': handler_help,
                 }
 
 
